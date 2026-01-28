@@ -267,7 +267,7 @@ export default function OrderHistory({ orders: initialOrders }) {
                               <div className="flex items-center space-x-4">
                                 <span className="text-sm text-gray-500">Phí vận chuyển:</span>
                                 <span className="text-sm font-medium text-gray-700">
-                                  {formatCurrency(order.shippingFee || 30000)}
+                                  {formatCurrency(order.shippingFee || 0)}
                                 </span>
                               </div>
                               <div className="flex items-center space-x-2">

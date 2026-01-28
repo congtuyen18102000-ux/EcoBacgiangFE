@@ -64,37 +64,20 @@ export default function Signin({ providers, callbackUrl, csrfToken }) {
         localStorage.removeItem("savedEmail");
       }
       
-      // Lấy thông tin user từ response
-      const user = response.user;
-      const redirectUrl = user?.role === "admin" ? "/dashboard" : (callbackUrl || "/");
+      // Xử lý redirect về trang trước đó (callbackUrl)
+      let redirectUrl = "/";
       
-      // Nếu redirect đến dashboard, đảm bảo NextAuth session đã được tạo
-      if (redirectUrl === "/dashboard") {
-        // Đợi NextAuth session được tạo và refresh
-        let session = null;
-        let retryCount = 0;
-        const maxRetries = 5;
+      if (callbackUrl) {
+        // Loại bỏ các trang không hợp lệ (đăng nhập, đăng ký)
+        const invalidPaths = ["/dang-nhap", "/dang-ky", "/auth/quen-mat-khau", "/auth/dat-lai-mat-khau"];
+        const isValidCallback = !invalidPaths.some(path => callbackUrl.includes(path));
         
-        while (!session && retryCount < maxRetries) {
-          await new Promise(resolve => setTimeout(resolve, 300));
-          session = await getSession();
-          retryCount++;
-          
-          if (!session && retryCount < maxRetries) {
-            console.log(`Đang đợi NextAuth session... (lần thử ${retryCount}/${maxRetries})`);
-          }
+        if (isValidCallback) {
+          redirectUrl = callbackUrl;
         }
-        
-        if (!session) {
-          console.error("NextAuth session không được tạo sau nhiều lần thử");
-          toast.error("Đăng nhập thành công nhưng không thể tạo session. Vui lòng thử lại.");
-          return;
-        }
-        
-        console.log("NextAuth session đã được tạo thành công");
       }
       
-      // Redirect sau khi đảm bảo session đã sẵn sàng
+      // Redirect về trang trước đó hoặc trang chủ
       setTimeout(() => router.push(redirectUrl), 500);
     } catch (error) {
       setStatus(`Lỗi: ${error.message || "Đã xảy ra lỗi khi đăng nhập"}`);
@@ -117,9 +100,18 @@ export default function Signin({ providers, callbackUrl, csrfToken }) {
         setStatus("Đăng nhập thành công!");
         toast.success(`Đăng nhập bằng ${providerId} thành công!`);
         
-        // Lấy thông tin session để kiểm tra role
-        const session = await getSession();
-        const redirectUrl = session?.user?.role === "admin" ? "/dashboard" : (callbackUrl || "/");
+        // Xử lý redirect về trang trước đó (callbackUrl)
+        let redirectUrl = "/";
+        
+        if (callbackUrl) {
+          // Loại bỏ các trang không hợp lệ (đăng nhập, đăng ký)
+          const invalidPaths = ["/dang-nhap", "/dang-ky", "/auth/quen-mat-khau", "/auth/dat-lai-mat-khau"];
+          const isValidCallback = !invalidPaths.some(path => callbackUrl.includes(path));
+          
+          if (isValidCallback) {
+            redirectUrl = callbackUrl;
+          }
+        }
         
         setTimeout(() => router.push(redirectUrl), 1000);
       }
@@ -357,7 +349,7 @@ export default function Signin({ providers, callbackUrl, csrfToken }) {
 export async function getServerSideProps(context) {
   const { req, query } = context;
   const session = await getSession({ req });
-  const callbackUrl = query.callbackUrl || process.env.NEXT_PUBLIC_DEFAULT_REDIRECT || "/dashboard";
+  const callbackUrl = query.callbackUrl || process.env.NEXT_PUBLIC_DEFAULT_REDIRECT || "/";
 
   if (session) {
     return {
