@@ -5,10 +5,23 @@ import LinkForm, { linkOption } from "./LinkForm";
 
 interface Props {
   onSubmit(link: linkOption): void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-const InsertLink: FC<Props> = ({ onSubmit }): JSX.Element => {
-  const [visible, setVisible] = useState(false);
+const InsertLink: FC<Props> = ({ onSubmit, open, onOpenChange }): JSX.Element => {
+  const [internalVisible, setInternalVisible] = useState(false);
+  const isControlled = open !== undefined;
+  const visible = isControlled ? open : internalVisible;
+
+  const hideForm = () => {
+    if (isControlled) onOpenChange?.(false);
+    else setInternalVisible(false);
+  };
+  const showForm = () => {
+    if (isControlled) onOpenChange?.(true);
+    else setInternalVisible(true);
+  };
 
   const handleSubmit = (link: linkOption) => {
     if (!link.url.trim()) return hideForm();
@@ -16,9 +29,6 @@ const InsertLink: FC<Props> = ({ onSubmit }): JSX.Element => {
     onSubmit(link);
     hideForm();
   };
-
-  const hideForm = () => setVisible(false);
-  const showForm = () => setVisible(true);
 
   return (
     <div

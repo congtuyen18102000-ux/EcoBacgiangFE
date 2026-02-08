@@ -2,7 +2,7 @@ import { useState } from "react";
 import { getData } from "../../utils/fetchData";
 import DefaultLayout from "../../components/layout/DefaultLayout";
 import Head from "next/head";
-import Products3 from "../../components/product/Products3";
+import Products3 from "../../components/products/Products3";
 
 const Products = (props) => {
   const [products, setProducts] = useState(props.products || []);

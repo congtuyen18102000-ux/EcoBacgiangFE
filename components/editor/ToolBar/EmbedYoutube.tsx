@@ -4,11 +4,24 @@ import Button from "../ToolBar/Button";
 
 interface Props {
   onSubmit(link: string): void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-const EmbedYoutube: FC<Props> = ({ onSubmit }): JSX.Element => {
+const EmbedYoutube: FC<Props> = ({ onSubmit, open, onOpenChange }): JSX.Element => {
   const [url, setUrl] = useState("");
-  const [visible, setVisible] = useState(false);
+  const [internalVisible, setInternalVisible] = useState(false);
+  const isControlled = open !== undefined;
+  const visible = isControlled ? open : internalVisible;
+
+  const hideForm = () => {
+    if (isControlled) onOpenChange?.(false);
+    else setInternalVisible(false);
+  };
+  const showForm = () => {
+    if (isControlled) onOpenChange?.(true);
+    else setInternalVisible(true);
+  };
 
   const handleSubmit = () => {
     if (!url.trim()) return hideForm();
@@ -17,9 +30,6 @@ const EmbedYoutube: FC<Props> = ({ onSubmit }): JSX.Element => {
     setUrl("");
     hideForm();
   };
-
-  const hideForm = () => setVisible(false);
-  const showForm = () => setVisible(true);
 
   return (
     <div

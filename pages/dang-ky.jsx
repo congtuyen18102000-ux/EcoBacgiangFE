@@ -281,11 +281,11 @@ export default function Signup({ csrfToken }) {
                     />
                     <label className="ml-2 text-white text-sm">
                       Tôi đồng ý với{" "}
-                      <Link href="/terms" className="text-orange-500 hover:underline">
+                      <Link href="/dieu-khoan-su-dung" className="text-orange-500 hover:underline">
                         Điều khoản
                       </Link>{" "}
                       &{" "}
-                      <Link href="/privacy" className="text-orange-500 hover:underline">
+                      <Link href="/chinh-sach-bao-mat" className="text-orange-500 hover:underline">
                         Chính sách bảo mật
                       </Link>
                       .
@@ -312,7 +312,7 @@ export default function Signup({ csrfToken }) {
                   disabled={isSubmitting}
                   className="w-full py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Đăng ký
+                  {isSubmitting ? "Đang xử lý..." : "Đăng ký"}
                 </button>
 
                 {/* Link to Login */}
@@ -340,10 +340,10 @@ export async function getServerSideProps(context) {
   console.log("Signup session:", session); // Debug
 
   if (session) {
-    console.log("Redirecting to dashboard");
+    const destination = session?.user?.role === "admin" ? "/dashboard" : "/";
     return {
       redirect: {
-        destination: "/dashboard",
+        destination,
         permanent: false,
       },
     };

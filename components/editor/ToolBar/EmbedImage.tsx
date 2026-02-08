@@ -4,13 +4,26 @@ import Button from "../ToolBar/Button";
 
 interface Props {
   onSubmit(url: string, alt?: string, showCaption?: boolean): void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-const EmbedImage: FC<Props> = ({ onSubmit }): JSX.Element => {
+const EmbedImage: FC<Props> = ({ onSubmit, open, onOpenChange }): JSX.Element => {
   const [url, setUrl] = useState("");
   const [alt, setAlt] = useState("");
   const [showCaption, setShowCaption] = useState(true); // Mặc định hiển thị caption
-  const [visible, setVisible] = useState(false);
+  const [internalVisible, setInternalVisible] = useState(false);
+  const isControlled = open !== undefined;
+  const visible = isControlled ? open : internalVisible;
+
+  const hideForm = () => {
+    if (isControlled) onOpenChange?.(false);
+    else setInternalVisible(false);
+  };
+  const showForm = () => {
+    if (isControlled) onOpenChange?.(true);
+    else setInternalVisible(true);
+  };
 
   const handleSubmit = () => {
     if (!url.trim()) return hideForm();
@@ -21,9 +34,6 @@ const EmbedImage: FC<Props> = ({ onSubmit }): JSX.Element => {
     setShowCaption(true); // Reset về mặc định
     hideForm();
   };
-
-  const hideForm = () => setVisible(false);
-  const showForm = () => setVisible(true);
 
   return (
     <div

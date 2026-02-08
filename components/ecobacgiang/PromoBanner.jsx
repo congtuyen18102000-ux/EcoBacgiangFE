@@ -1,25 +1,21 @@
 // components/PromoBanner.jsx
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { promoBannerService } from '../../lib/api-services'
 
 export default function PromoBanner() {
   const [config, setConfig] = useState(null)
   const [time, setTime] = useState({ d: 0, h: 0, m: 0, s: 0 })
   const [loading, setLoading] = useState(true)
 
-  // Fetch config từ API
+  // Fetch config từ BE
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_SERVER_URL || 'http://localhost:5000/api'
-        const response = await fetch(`${apiUrl}/promo-banner`)
-        if (response.ok) {
-          const data = await response.json()
-          setConfig(data)
-        }
+        const data = await promoBannerService.get()
+        setConfig(data)
       } catch (error) {
         console.error('Error fetching promo banner config:', error)
-        // Fallback về giá trị mặc định
         setConfig({
           countdownDate: '2026-01-01T00:00:00',
           subtitle: 'Khám phá Eco Bắc Giang',
@@ -72,7 +68,7 @@ export default function PromoBanner() {
 
   return (
     <section
-      className="max-w-7xl mx-auto
+      className="container mx-auto
         relative overflow-hidden rounded-xl shadow-lg
         bg-no-repeat bg-center bg-cover mb-4
       "

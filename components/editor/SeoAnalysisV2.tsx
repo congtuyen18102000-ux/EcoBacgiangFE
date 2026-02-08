@@ -218,6 +218,7 @@ const SeoAnalysisV2: FC<SeoAnalysisProps> = ({ editor, title, meta, slug, focusK
     const maxTotal = checks.reduce((sum, check) => sum + check.maxScore, 0);
     setTotalScore(total);
     setMaxTotalScore(maxTotal);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- helper functions are stable; only re-run when inputs change
   }, [editor, title, meta, slug, focusKeyword]);
 
   // ===== HELPER FUNCTIONS =====

@@ -1,6 +1,6 @@
 import React from 'react';
 import AdminLayout from '../../../components/layout/AdminLayout';
-import InternalAccounting from '../../../components/ecobacgiang/InternalAccounting';
+import { InternalAccounting } from '../../../components/admin/dashboard';
 
 /**
  * Internal Accounting Page - Module Kế toán Nội bộ

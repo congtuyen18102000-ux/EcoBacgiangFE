@@ -6,10 +6,20 @@ export type dropDownOptions = { label: string; onClick(): void }[];
 interface Props {
   options: dropDownOptions;
   head: ReactNode;
+  /** Controlled: khi có thì chỉ mở 1 dropdown tại 1 thời điểm (đóng các toolbar khác) */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-const DropdownOptions: FC<Props> = ({ head, options }): JSX.Element => {
-  const [showOptions, setShowOptions] = useState(false);
+const DropdownOptions: FC<Props> = ({ head, options, open, onOpenChange }): JSX.Element => {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = open !== undefined;
+  const showOptions = isControlled ? open : internalOpen;
+
+  const setShowOptions = (value: boolean) => {
+    if (isControlled) onOpenChange?.(value);
+    else setInternalOpen(value);
+  };
 
   return (
     <div className="relative">
@@ -27,7 +37,10 @@ const DropdownOptions: FC<Props> = ({ head, options }): JSX.Element => {
                 <li
                   className="px-3 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
                   key={label + index}
-                  onMouseDown={onClick}
+                  onMouseDown={() => {
+                    onClick();
+                    setShowOptions(false);
+                  }}
                 >
                   {label}
                 </li>

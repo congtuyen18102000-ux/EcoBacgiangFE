@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 
 const VisionComponent = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -28,12 +29,13 @@ const VisionComponent = () => {
           <div className={`relative transition-all duration-1000 delay-700 ${
             isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
           }`}>
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl aspect-video">
               <div className="absolute inset-0 bg-gradient-to-t from-green-900/20 to-transparent z-10"></div>
-              <img
-                src="/images/tam-nhin.jpg"
+              <Image
+                src="/images/2.jpg"
                 alt="Tầm nhìn Eco Bắc Giang"
-                className="w-full h-auto object-cover rounded-2xl"
+                fill
+                className="object-cover rounded-2xl"
               />
               
               {/* Overlay Content */}

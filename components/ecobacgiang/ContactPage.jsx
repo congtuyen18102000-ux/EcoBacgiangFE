@@ -167,7 +167,7 @@ export default function ContactPage() {
       <div className="h-[80px]"> </div>
       {/* Contact Information */}
       <section className="md:py-20 py-8 px-5">
-        <div className="max-w-5xl mx-auto px-4">
+        <div className="container mx-auto px-4 ">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Contact Info */}
             <div>

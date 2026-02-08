@@ -1,66 +1,10 @@
-import { useState, useRef, useEffect } from "react";
 import BusinessPhilosophy from "../../components/about/BusinessPhilosophy ";
 import Intro from "../../components/about/Intro";
 import QualityPolicy from "../../components/about/QualityPolicy";
 import DefaultLayout from "../../components/layout/DefaultLayout";
 import Head from "next/head";
-import Image from "next/image";
 
 export default function AboutSection() {
-  const [videoError, setVideoError] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [ibaseuted, setIbaseuted] = useState(true);
-  const videoRef = useRef(null);
-
-  const videoSrc = "/eco-farm.mp4";
-  const fallbackImage = "/images/farm-fallback.jpg";
-
-  const togglePlay = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play().catch(() => {
-          setVideoError(true);
-        });
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
-
-  const toggleMute = () => {
-    if (videoRef.current) {
-      videoRef.current.muted = !ibaseuted;
-      setIbaseuted(!ibaseuted);
-    }
-  };
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (videoRef.current) {
-          if (entry.isIntersecting && isPlaying) {
-            videoRef.current.play().catch(() => setVideoError(true));
-          } else {
-            videoRef.current.pause();
-          }
-        }
-      },
-      {
-        threshold: 0.5,
-      }
-    );
-
-    if (videoRef.current) {
-      observer.observe(videoRef.current);
-    }
-
-    return () => {
-      if (videoRef.current) {
-        observer.unobserve(videoRef.current);
-      }
-    };
-  }, [isPlaying]);
 
   return (
     <DefaultLayout>
@@ -175,7 +119,7 @@ export default function AboutSection() {
           <div className="absolute bottom-0 left-0 w-72 h-72 bg-green-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-4000"></div>
         </div>
 
-        <div className="relative container mx-auto max-w-7xl">
+        <div className="relative container mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Text Section */}
             <div className="space-y-8">
@@ -230,77 +174,16 @@ export default function AboutSection() {
             {/* Video Section */}
             <div className="relative">
               <div className="relative rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-500">
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10"></div>
-                
-                {videoError ? (
-                  <div className="relative w-full h-96 rounded-2xl overflow-hidden">
-                    <Image
-                      src={fallbackImage}
-                      alt="Cảnh trang trại hữu cơ Eco Bắc Giang"
-                      fill
-                      style={{ objectFit: "cover" }}
-                      quality={90}
-                      loading="lazy"
-                      className="rounded-2xl"
-                    />
-                  </div>
-                ) : (
-                  <div className="relative w-full h-96 rounded-2xl overflow-hidden">
-                    <video
-                      ref={videoRef}
-                      className="w-full h-full object-cover rounded-2xl"
-                      src={videoSrc}
-                      autoPlay
-                      muted={ibaseuted}
-                      loop
-                      playsInline
-                      preload="metadata"
-                      tabIndex={0}
-                      title="Video giới thiệu nông trại Eco Bắc Giang"
-                      aria-label="Video giới thiệu nông trại Eco Bắc Giang"
-                      onError={() => setVideoError(true)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          togglePlay();
-                        }
-                      }}
-                    />
-                    
-                    {/* Enhanced Controls Overlay */}
-                    <div className="absolute bottom-6 right-6 flex space-x-3">
-                      <button
-                        onClick={togglePlay}
-                        className="bg-black/60 hover:bg-black/80 text-white p-3 rounded-full backdrop-blur-base transition-all duration-300 hover:scale-110 shadow-lg"
-                        aria-label={isPlaying ? "Tạm dừng video" : "Phát video"}
-                      >
-                        {isPlaying ? (
-                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                          </svg>
-                        ) : (
-                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-                          </svg>
-                        )}
-                      </button>
-                      <button
-                        onClick={toggleMute}
-                        className="bg-black/60 hover:bg-black/80 text-white p-3 rounded-full backdrop-blur-base transition-all duration-300 hover:scale-110 shadow-lg"
-                        aria-label={ibaseuted ? "Bật âm thanh" : "Tắt âm thanh"}
-                      >
-                        {ibaseuted ? (
-                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                          </svg>
-                        ) : (
-                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                          </svg>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                )}
+                <div className="relative w-full aspect-video rounded-2xl overflow-hidden">
+                  <iframe
+                    className="w-full h-full rounded-2xl"
+                    src="https://www.youtube.com/embed/YOUR_VIDEO_ID?autoplay=1&mute=1&loop=1&playlist=YOUR_VIDEO_ID&controls=1&modestbranding=1&rel=0"
+                    title="Video giới thiệu nông trại Eco Bắc Giang"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    loading="lazy"
+                  ></iframe>
+                </div>
               </div>
             </div>
           </div>

@@ -2,11 +2,8 @@ import Image from "next/image";
 import { ChangeEventHandler, FC, useCallback, useState, useEffect } from "react";
 import { AiOutlineCloudUpload } from "react-icons/ai";
 import { FiEdit2, FiSave, FiX } from "react-icons/fi";
-import ActionButton from "../../common/ActionButton";
 import ModalContainer, { ModalProps } from "../../common/ModalContainer";
 import Gallery from "./Gallery";
-import axios from "axios";
-import { useSession } from "next-auth/react";
 
 export interface ImageSelectionResult {
   src: string;
@@ -36,7 +33,6 @@ const GalleryModal: FC<Props> = ({
   onClose,
   popover = false,
 }): JSX.Element | null => {
-  const { data: session, status } = useSession();
   const [selectedImage, setSelectedImage] = useState<ImageData | null>(null);
   const [altText, setAltText] = useState("");
   const [editingAltText, setEditingAltText] = useState(false);
@@ -112,7 +108,6 @@ const GalleryModal: FC<Props> = ({
   };
 
   const handleImageSelect = (image: ImageData) => {
-    console.log("Selected image:", image);
     setSelectedImage(image);
     setAltText(image.altText || "");
     setEditingAltText(false);
@@ -143,10 +138,6 @@ const GalleryModal: FC<Props> = ({
     setErrorMessage("");
     
     try {
-      console.log("Session status:", status);
-      console.log("Session data:", session);
-      console.log("Đang lưu alt text cho image:", selectedImage.id, "với nội dung:", altText.trim());
-      
       // Chỉ dùng Server API
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_SERVER_URL;
       if (!apiBaseUrl) {
@@ -175,9 +166,7 @@ const GalleryModal: FC<Props> = ({
       if (!response.ok) {
         throw new Error(responseData.error || 'Failed to update alt text');
       }
-      
-      console.log("Kết quả lưu alt text:", responseData);
-      
+
       // Cập nhật selectedImage với alt text mới
       if (selectedImage) {
         setSelectedImage({
@@ -354,23 +343,7 @@ const GalleryModal: FC<Props> = ({
                   >
                     Chọn ảnh này
                   </button>
-                  
-                  {/* Test Session Button */}
-                  <button
-                    onClick={async () => {
-                      try {
-                        const response = await axios.get("/api/test-session");
-                        console.log("Test session response:", response.data);
-                        alert(JSON.stringify(response.data, null, 2));
-                      } catch (error: any) {
-                        console.error("Test session error:", error);
-                        alert("Error: " + (error.response?.data?.error || error.message));
-                      }
-                    }}
-                    className="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-                  >
-                    Test Session
-                  </button>
+
                 </div>
               </div>
             )}
@@ -412,10 +385,12 @@ const GalleryModal: FC<Props> = ({
           {/* Image Preview */}
           {uploadPreviewUrl && (
             <div className="relative aspect-video bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
-              <img
+              <Image
                 src={uploadPreviewUrl}
                 alt="Preview"
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
+                unoptimized
               />
             </div>
           )}

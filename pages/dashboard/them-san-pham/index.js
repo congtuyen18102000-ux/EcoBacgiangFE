@@ -1,10 +1,11 @@
 import React, { useReducer, useEffect, useCallback, useState } from 'react';
+import Image from 'next/image';
 import axios from 'axios';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import { useRouter } from 'next/router';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Editor from '../../../components/univisport/Editor';
+import Editor from '../../../components/editor';
 import { debounce } from 'lodash';
 import { normalizeUnit } from '../../../utils/normalizeUnit';
 
@@ -262,7 +263,8 @@ export default function CreateProductPage() {
     }
   };
 
-  // Debounce slug check
+  // Debounce slug check (debounce returns a function with stable ref; deps intentionally minimal)
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- debounce() dependency unknown to ESLint
   const debouncedCheckSlug = useCallback(
     debounce(async (slug, productId) => {
       // Bỏ qua nếu slug rỗng hoặc quá ngắn
@@ -277,7 +279,7 @@ export default function CreateProductPage() {
         setErrors((prev) => prev.filter((err) => err !== 'Slug đã tồn tại, vui lòng chọn slug khác'));
       }
     }, 500),
-    []
+    [checkSlug, addError]
   );
 
   useEffect(() => {
@@ -663,12 +665,13 @@ export default function CreateProductPage() {
                     required
                   />
                   {images[0]?.src && (
-                    <div className="w-20 h-20 border border-gray-300 rounded-lg overflow-hidden flex-shrink-0">
-                      <img
+                    <div className="relative w-20 h-20 border border-gray-300 rounded-lg overflow-hidden flex-shrink-0">
+                      <Image
                         src={images[0].src}
                         alt="Preview"
-                        className="w-full h-full object-cover"
-                        onError={(e) => e.target.parentElement.style.display = 'none'}
+                        fill
+                        className="object-cover"
+                        unoptimized
                       />
                     </div>
                   )}
@@ -695,12 +698,13 @@ export default function CreateProductPage() {
                         placeholder={`https://flickr.com/photo.jpg hoặc /images/products/gallery-${imageIndex}.jpg`}
                       />
                       {img.src && (
-                        <div className="w-16 h-16 border border-gray-300 rounded-lg overflow-hidden flex-shrink-0">
-                          <img
+                        <div className="relative w-16 h-16 border border-gray-300 rounded-lg overflow-hidden flex-shrink-0">
+                          <Image
                             src={img.src}
                             alt={`Preview ${imageIndex + 1}`}
-                            className="w-full h-full object-cover"
-                            onError={(e) => e.target.parentElement.style.display = 'none'}
+                            fill
+                            className="object-cover"
+                            unoptimized
                           />
                         </div>
                       )}

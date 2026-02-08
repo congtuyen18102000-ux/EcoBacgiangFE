@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Camera, ChevronRight, Bell, Truck, Gift, Heart, Home, Layers, ShoppingCart, User, ArrowLeft, Settings, Edit3, MapPin, FileText, CreditCard } from "lucide-react";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { signIn } from "next-auth/react";
+import useAuth from "../../hooks/useAuth";
+import { signOut } from "../../lib/auth-helper";
 import axios from "axios";
 import { userService } from "../../lib/api-services";
 import { signInWithApiServer } from "../../lib/auth-helper";
@@ -19,7 +22,8 @@ import LoginComponent from "../../components/ecobacgiang/LoginComponent";
 import AccountSettingsList from "../../components/ecobacgiang/AccountSettingsList";
 
 export default function UserProfile() {
-  const { data: session, status } = useSession();
+  const { user, rawUser, status } = useAuth();
+  const session = user ? { user: { ...user, ...rawUser } } : null;
 
   const [selectedTab, setSelectedTab] = useState("account");
   const [tabLoading, setTabLoading] = useState(false);
@@ -87,6 +91,7 @@ export default function UserProfile() {
     if (session && session.user) {
       fetchUserData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchUserData recreated each render, run only when session changes
   }, [session]);
 
   const handleDateChange = (date) => {
@@ -355,12 +360,14 @@ export default function UserProfile() {
              <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-3 md:p-4 mb-4 md:mb-6 shadow-lg border border-gray-100">
               <div className="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-6">
                 <div className="relative">
-                  <div className="w-20 h-20 md:w-28 md:h-28 lg:w-24 lg:h-24 rounded-full overflow-hidden bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-2xl ring-4 ring-green-100">
+                  <div className="w-20 h-20 md:w-28 md:h-28 lg:w-24 lg:h-24 rounded-full overflow-hidden bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-2xl ring-4 ring-green-100 relative">
                     {image ? (
-                      <img
+                      <Image
                         src={image}
                         alt="User Avatar"
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
+                        unoptimized
                       />
                     ) : (
                       <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 text-2xl md:text-3xl font-bold">

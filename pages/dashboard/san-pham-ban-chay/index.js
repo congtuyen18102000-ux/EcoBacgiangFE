@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import AdminLayout from '../../../components/layout/AdminLayout';
-import BestSellers from '../../../components/ecobacgiang/BestSellers';
+import { BestSellers } from '../../../components/admin/dashboard';
 
 export default function Index() {
   const [products, setProducts] = useState([]);

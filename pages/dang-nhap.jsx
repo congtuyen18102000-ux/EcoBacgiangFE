@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Head from "next/head";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
@@ -23,17 +23,34 @@ const loginValidation = Yup.object({
   login_password: Yup.string().required("Vui lòng nhập mật khẩu."),
 });
 
-export default function Signin({ providers, callbackUrl, csrfToken }) {
+const ERROR_MESSAGES = {
+  Callback: "Đăng nhập Google thất bại. Kiểm tra NEXTAUTH_URL và Redirect URI trong Google Cloud Console (http://localhost:3000/api/auth/callback/google).",
+  OAuthAccountNotLinked: "Email này đã đăng ký bằng cách khác. Vui lòng đăng nhập bằng email/mật khẩu.",
+  Default: "Đăng nhập bằng Google thất bại. Vui lòng thử lại.",
+};
+
+export default function Signin({ providers, callbackUrl, csrfToken, error: authError }) {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [status, setStatus] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
 
-  // Tải email/số điện thoại từ localStorage
-  const initialValues = {
-    login_email: typeof window !== "undefined" ? localStorage.getItem("savedEmail") || "" : "",
+  const [initialValues, setInitialValues] = useState({
+    login_email: "",
     login_password: "",
-  };
+  });
+  useEffect(() => {
+    const saved = typeof window !== "undefined" ? localStorage.getItem("savedEmail") || "" : "";
+    setInitialValues({ login_email: saved, login_password: "" });
+  }, []);
+
+  useEffect(() => {
+    if (authError) {
+      const msg = ERROR_MESSAGES[authError] || ERROR_MESSAGES.Default;
+      toast.error(msg);
+      setStatus(`Lỗi: ${authError}`);
+    }
+  }, [authError]);
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
@@ -69,7 +86,7 @@ export default function Signin({ providers, callbackUrl, csrfToken }) {
       
       if (callbackUrl) {
         // Loại bỏ các trang không hợp lệ (đăng nhập, đăng ký)
-        const invalidPaths = ["/dang-nhap", "/dang-ky", "/auth/quen-mat-khau", "/auth/dat-lai-mat-khau"];
+        const invalidPaths = ["/dang-nhap", "/dang-ky", "/quen-mat-khau", "/dat-lai-mat-khau"];
         const isValidCallback = !invalidPaths.some(path => callbackUrl.includes(path));
         
         if (isValidCallback) {
@@ -88,33 +105,28 @@ export default function Signin({ providers, callbackUrl, csrfToken }) {
   };
 
   const handleSocialSignIn = async (providerId) => {
-    // Social login vẫn dùng NextAuth (Google/Facebook OAuth)
-    // Vì Server API chưa có OAuth implementation
-    setStatus(`Đang đăng nhập bằng ${providerId}...`);
+    setStatus(`Đang chuyển đến ${providerId}...`);
     try {
-      const res = await signIn(providerId, { redirect: false, callbackUrl });
+      const res = await signIn(providerId, { redirect: false, callbackUrl: callbackUrl || "/" });
       if (res?.error) {
         setStatus(`Lỗi: ${res.error}`);
         toast.error(`Lỗi khi đăng nhập bằng ${providerId}: ${res.error}`);
-      } else {
-        setStatus("Đăng nhập thành công!");
-        toast.success(`Đăng nhập bằng ${providerId} thành công!`);
-        
-        // Xử lý redirect về trang trước đó (callbackUrl)
-        let redirectUrl = "/";
-        
-        if (callbackUrl) {
-          // Loại bỏ các trang không hợp lệ (đăng nhập, đăng ký)
-          const invalidPaths = ["/dang-nhap", "/dang-ky", "/auth/quen-mat-khau", "/auth/dat-lai-mat-khau"];
-          const isValidCallback = !invalidPaths.some(path => callbackUrl.includes(path));
-          
-          if (isValidCallback) {
-            redirectUrl = callbackUrl;
-          }
-        }
-        
-        setTimeout(() => router.push(redirectUrl), 1000);
+        return;
       }
+      // OAuth: NextAuth trả về url để redirect sang Google -> cần chuyển hướng
+      if (res?.url) {
+        window.location.href = res.url;
+        return;
+      }
+      setStatus("Đăng nhập thành công!");
+      toast.success(`Đăng nhập bằng ${providerId} thành công!`);
+      let redirectUrl = "/";
+      if (callbackUrl) {
+        const invalidPaths = ["/dang-nhap", "/dang-ky", "/quen-mat-khau", "/dat-lai-mat-khau"];
+        const isValidCallback = !invalidPaths.some((path) => callbackUrl.includes(path));
+        if (isValidCallback) redirectUrl = callbackUrl;
+      }
+      setTimeout(() => router.push(redirectUrl), 1000);
     } catch (error) {
       setStatus(`Lỗi: ${error.message || "Đã xảy ra lỗi khi đăng nhập"}`);
       toast.error(`Lỗi khi đăng nhập bằng ${providerId}`);
@@ -309,7 +321,7 @@ export default function Signin({ providers, callbackUrl, csrfToken }) {
                                      {/* Quên mật khẩu và Đăng ký */}
                    <div className="text-center mt-4">
                      <Link
-                       href="/auth/quen-mat-khau"
+                       href="/quen-mat-khau"
                        className="text-blue-600 hover:text-orange-500 transition-colors"
                      >
                        Quên mật khẩu?
@@ -349,14 +361,14 @@ export default function Signin({ providers, callbackUrl, csrfToken }) {
 export async function getServerSideProps(context) {
   const { req, query } = context;
   const session = await getSession({ req });
-  const callbackUrl = query.callbackUrl || process.env.NEXT_PUBLIC_DEFAULT_REDIRECT || "/";
+  let callbackUrl = query.callbackUrl || process.env.NEXT_PUBLIC_DEFAULT_REDIRECT || "/";
+  const invalidCallbackPaths = ["/dang-nhap", "/dang-ky", "/quen-mat-khau", "/dat-lai-mat-khau", "/api/auth"];
+  if (invalidCallbackPaths.some((p) => callbackUrl.includes(p))) {
+    callbackUrl = "/";
+  }
 
   if (session) {
-    return {
-      redirect: {
-        destination: callbackUrl,
-      },
-    };
+    return { redirect: { destination: callbackUrl } };
   }
 
   const csrfToken = await getCsrfToken(context);
@@ -367,6 +379,7 @@ export async function getServerSideProps(context) {
       providers: providers || { google: {} },
       csrfToken: csrfToken || null,
       callbackUrl,
+      error: query.error || null,
     },
   };
 }

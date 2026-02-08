@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 export default function CrowdfundingSection() {
   return (
     <div className="w-full py-6 bg-gradient-to-br from-green-50 to-blue-50 relative">
@@ -53,11 +55,14 @@ export default function CrowdfundingSection() {
               {/* Cột phải - QR Code */}
               <div className="flex justify-center">
                 <div className="bg-white border-2 border-green-200 rounded-xl p-6 shadow-md max-w-sm">
-                  <img
-                    src="/images/qr-code.png"
-                    alt="Mã QR để chung tay cùng Eco Bắc Giang xây dựng nông sản hữu cơ"
-                    className="w-48 h-48 object-contain mb-4 rounded-lg mx-auto"
-                  />
+                  <div className="relative w-48 h-48 mb-4 mx-auto rounded-lg overflow-hidden">
+                    <Image
+                      src="/images/qr-code.jpg"
+                      alt="Mã QR để chung tay cùng Eco Bắc Giang xây dựng nông sản hữu cơ"
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
                   
                   <div className="text-center">
                     <div className="flex items-center justify-center mb-3">

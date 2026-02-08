@@ -1,14 +1,19 @@
+import Image from "next/image";
+
 const OrganicProcess = () => {
   return (
-    <section className="bg-white py-20">
-      <div className="container mx-auto px-6 lg:px-20">
+    <section className="bg-white py-4">
+      <div className="container mx-auto px-4 md:px-0">
         {/* Phần tiêu đề */}
         <div className="text-center mb-12">
-          <img
-            src="/images/4.webp"
-            alt="Sản phẩm hữu cơ và tinh khiết"
-            className="mx-auto md:w-2/5 w-4/5 mb-6"
-          />
+          <div className="relative mx-auto md:w-2/5 w-4/5 mb-6 aspect-[4/2]">
+            <Image
+              src="/images/4.webp"
+              alt="Sản phẩm hữu cơ và tinh khiết"
+              fill
+              className="object-contain"
+            />
+          </div>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
             Quy Trình Hữu Cơ
           </h2>
@@ -22,11 +27,13 @@ const OrganicProcess = () => {
           {/* Bước 1 */}
           <div className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100">
             <div className="relative mb-6">
-              <div className="w-20 h-20 mx-auto bg-green-50 rounded-full flex items-center justify-center">
-                <img
+              <div className="w-20 h-20 mx-auto bg-green-50 rounded-full flex items-center justify-center relative">
+                <Image
                   src="/images/step-1.webp"
                   alt="Lên kế hoạch"
-                  className="w-12 h-12"
+                  width={48}
+                  height={48}
+                  className="object-contain"
                 />
               </div>
               <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
@@ -45,11 +52,13 @@ const OrganicProcess = () => {
           {/* Bước 2 */}
           <div className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100">
             <div className="relative mb-6">
-              <div className="w-20 h-20 mx-auto bg-green-50 rounded-full flex items-center justify-center">
-                <img
+              <div className="w-20 h-20 mx-auto bg-green-50 rounded-full flex items-center justify-center relative">
+                <Image
                   src="/images/step-2.webp"
                   alt="Ươm mầm"
-                  className="w-12 h-12"
+                  width={48}
+                  height={48}
+                  className="object-contain"
                 />
               </div>
               <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
@@ -68,11 +77,13 @@ const OrganicProcess = () => {
           {/* Bước 3 */}
           <div className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100">
             <div className="relative mb-6">
-              <div className="w-20 h-20 mx-auto bg-green-50 rounded-full flex items-center justify-center">
-                <img
+              <div className="w-20 h-20 mx-auto bg-green-50 rounded-full flex items-center justify-center relative">
+                <Image
                   src="/images/step-1.webp"
                   alt="Đảm bảo chất lượng"
-                  className="w-12 h-12"
+                  width={48}
+                  height={48}
+                  className="object-contain"
                 />
               </div>
               <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
@@ -91,11 +102,13 @@ const OrganicProcess = () => {
           {/* Bước 4 */}
           <div className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100">
             <div className="relative mb-6">
-              <div className="w-20 h-20 mx-auto bg-green-50 rounded-full flex items-center justify-center">
-                <img
+              <div className="w-20 h-20 mx-auto bg-green-50 rounded-full flex items-center justify-center relative">
+                <Image
                   src="/images/step-3.webp"
                   alt="Tiếp thị"
-                  className="w-12 h-12"
+                  width={48}
+                  height={48}
+                  className="object-contain"
                 />
               </div>
               <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-bold">

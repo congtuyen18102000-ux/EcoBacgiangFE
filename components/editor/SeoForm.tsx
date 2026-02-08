@@ -194,6 +194,7 @@ const SEOForm: FC<Props> = ({
     const newValues = { ...values, slug };
     setValues(newValues);
     onChange(newValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only sync slug when title changes; adding values would cause loop
   }, [title, onChange]);
 
   useEffect(() => {

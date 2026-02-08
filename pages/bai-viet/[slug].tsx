@@ -7,7 +7,7 @@ import DefaultLayout from "../../components/layout/DefaultLayout";
 import Share from "../../components/common/Share";
 import Link from "next/link";
 import Image from "next/image";
-import { trimText } from "../../utils/helper";
+import { trimText, getReadingTimeMinutes } from "../../utils/helper";
 
 type PostData = {
   id: string;
@@ -92,7 +92,7 @@ const SinglePost: NextPage<Props> = ({ post, meta }) => {
         thumbnail={errorMeta.og.image}
         meta={errorMeta}
       >
-        <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="container mx-auto py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-800">Bài viết không tồn tại</h1>
             <p className="text-gray-600 mt-2">Bài viết bạn đang tìm kiếm không tồn tại hoặc đã bị xóa.</p>
@@ -157,7 +157,7 @@ const SinglePost: NextPage<Props> = ({ post, meta }) => {
       meta={meta}
     >
       <div className="h-[80px]"></div>
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="container mx-auto py-8 px-4 md:px-0">
         <div className="flex flex-col md:flex-row">
           {/* Main Content - 75% width on md and up */}
           <div className="w-full md:w-3/4 pr-0 md:pr-8 mb-4 md:mb-0">
@@ -168,8 +168,8 @@ const SinglePost: NextPage<Props> = ({ post, meta }) => {
                   Bài viết
                 </Link>
                 <span>›</span>
-                <span className="flex font-bold gap-2 mb-4 text-base text-gray-600">
-                  {trimText(title, 35)}
+                <span className="flex font-bold gap-2 md:mb-4 mb-1 text-base text-gray-600">
+                  {trimText(title, 30)}
                 </span>
               </div>
 
@@ -182,6 +182,9 @@ const SinglePost: NextPage<Props> = ({ post, meta }) => {
               </div>
               <div className="mt-2 uppercase text-green-800 font-xl">
                 <b>{category}</b>
+              </div>
+              <div className="mt-1 text-sm text-gray-500">
+                {getReadingTimeMinutes(content || "")} phút đọc
               </div>
               <div className="blog prose prose-lg dark:prose-invert max-w-2xl md:max-w-4xl lg:max-w-5xl [&_img]:mx-auto">
                 <style jsx>{`

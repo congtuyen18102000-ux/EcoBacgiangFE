@@ -1,62 +1,25 @@
-import classNames from "classnames";
+// components/common/ConfirmModal.tsx
 import { FC } from "react";
-import { ImSpinner3 } from "react-icons/im";
-import ModalContainer, { ModalProps } from "./ModalContainer";
+import Modal from "react-modal";
 
-interface Props extends ModalProps {
+interface ConfirmModalProps {
+  isOpen: boolean;
   title: string;
-  subTitle: string;
-  busy?: boolean;
-  onCancel?(): void;
-  onConfirm?(): void;
+  message: string;
+  onConfirm: () => void;
+  onCancel: () => void;
 }
 
-const commonBtnClasses = "px-3 py-1 text-white rounded";
-
-const ConfirmModal: FC<Props> = ({
-  visible,
-  title,
-  subTitle,
-  busy = false,
-  onClose,
-  onCancel,
-  onConfirm,
-
-}): JSX.Element => {
+const ConfirmModal: FC<ConfirmModalProps> = ({ isOpen, title, message, onConfirm, onCancel }) => {
   return (
-    <ModalContainer visible={visible} onClose={onClose}>
-      <div className="bg-orange-400 dark:bg-primary rounded  p-3 max-w-[380px]">
-        {/* title */}
-        <p className="dark:text-primary-dark text-primary font-semibold text-lg">
-          {title}
-        </p>
-        {/* sub title */}
-        <p className="dark:text-primary-dark text-primary">{subTitle}</p>
-        {/* buttons */}
-        {busy && (
-          <p className="flex items-center space-x-2 dark:text-primary-dark text-primary pt-2">
-            <ImSpinner3 className="animate-spin" />
-            <span>Vui lòng đợi</span>
-          </p>
-        )}
-        {!busy && (
-          <div className="flex items-center space-x-2 pt-2">
-            <button
-              onClick={onConfirm}
-              className={classNames(commonBtnClasses, "bg-red-500")}
-            >
-              Đồng ý
-            </button>
-            <button
-              onClick={onCancel}
-              className={classNames(commonBtnClasses, "bg-blue-500")}
-            >
-              Huỷ bỏ
-            </button>
-          </div>
-        )}
+    <Modal isOpen={isOpen} onRequestClose={onCancel} ariaHideApp={false} className="p-4 bg-white rounded shadow-lg max-w-md mx-auto mt-20">
+      <h2 className="text-xl font-bold mb-4">{title}</h2>
+      <p className="mb-6">{message}</p>
+      <div className="flex justify-end gap-2">
+        <button onClick={onCancel} className="px-4 py-2 border rounded">Hủy</button>
+        <button onClick={onConfirm} className="px-4 py-2 bg-red-500 text-white rounded">Xác nhận</button>
       </div>
-    </ModalContainer>
+    </Modal>
   );
 };
 

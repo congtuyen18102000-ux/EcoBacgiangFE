@@ -1,6 +1,6 @@
 import React from 'react'
-import CustomDataTable from '../../../components/backend/dashboard/CustomDataTable'
-import AdminLayout from '../../../components/layout/AdminLayout'
+import AdminLayout from '../../../components/layout/AdminLayout';
+import { CustomDataTable } from '../../../components/admin/dashboard';
 
 export default function KhachHangPage() {
   return (

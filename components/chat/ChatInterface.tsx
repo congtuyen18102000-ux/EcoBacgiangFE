@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
 import { Send, Bot, User, Loader2, X, Minimize2, Maximize2 } from 'lucide-react';
 
 interface Message {
@@ -133,17 +134,19 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
               >
                 <div className={`flex max-w-[80%] ${message.isUser ? 'flex-row-reverse' : 'flex-row'}`}>
                   {/* Avatar */}
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center relative ${
                     message.isUser
                       ? 'bg-green-600 ml-2'
                       : 'bg-green-600 mr-2'
                   } overflow-hidden`}>
                     {message.isUser ? (
                       userAvatar ? (
-                        <img
+                        <Image
                           src={userAvatar}
                           alt="User avatar"
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover"
+                          unoptimized
                         />
                       ) : (
                         <User className="w-4 h-4 text-white" />

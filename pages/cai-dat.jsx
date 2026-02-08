@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import React, { useState, useEffect, useMemo } from 'react';
+import useAuth from '../hooks/useAuth';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import Sidebar from '../components/backend/Slidebar';
+import Sidebar from '../components/admin/layout/Slidebar';
+import { promoBannerService } from '../lib/api-services';
 import {
   Settings,
   Store,
@@ -20,7 +21,11 @@ import {
 } from 'lucide-react';
 
 export default function CaiDat() {
-  const { data: session, status } = useSession();
+  const { user, isAuthenticated, status } = useAuth();
+  const session = useMemo(
+    () => (isAuthenticated && user ? { user } : null),
+    [isAuthenticated, user]
+  );
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('general');
   const [isLoading, setIsLoading] = useState(false);
@@ -57,7 +62,7 @@ export default function CaiDat() {
     enableCOD: true,
     momoPhone: '',
     momoName: '',
-    sepayApiKey: '',
+    sepayApiKey: 'API',
     sepaySecretKey: ''
   });
 
@@ -89,36 +94,32 @@ export default function CaiDat() {
     }
   }, [session, status, router]);
 
-  // Fetch promo banner config
+  // Fetch promo banner config từ BE
   useEffect(() => {
     const fetchPromoBannerConfig = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_SERVER_URL || 'http://localhost:5000/api';
-        const response = await fetch(`${apiUrl}/promo-banner`);
-        if (response.ok) {
-          const data = await response.json();
-          const countdownDate = data.countdownDate
-            ? new Date(data.countdownDate).toISOString().slice(0, 16)
-            : "";
-          
-          setPromoBannerSettings({
-            countdownDate,
-            subtitle: data.subtitle || "",
-            title: data.title || "",
-            description: data.description || "",
-            countdownLabel: data.countdownLabel || "",
-            buttonText: data.buttonText || "",
-            buttonLink: data.buttonLink || "",
-            backgroundImage: data.backgroundImage || "",
-            isActive: data.isActive !== undefined ? data.isActive : true,
-          });
-          setPreviewImage(data.backgroundImage || "");
-        }
+        const data = await promoBannerService.get();
+        const countdownDate = data.countdownDate
+          ? new Date(data.countdownDate).toISOString().slice(0, 16)
+          : "";
+
+        setPromoBannerSettings({
+          countdownDate,
+          subtitle: data.subtitle || "",
+          title: data.title || "",
+          description: data.description || "",
+          countdownLabel: data.countdownLabel || "",
+          buttonText: data.buttonText || "",
+          buttonLink: data.buttonLink || "",
+          backgroundImage: data.backgroundImage || "",
+          isActive: data.isActive !== undefined ? data.isActive : true,
+        });
+        setPreviewImage(data.backgroundImage || "");
       } catch (error) {
         console.error("Error fetching promo banner config:", error);
       }
     };
-    
+
     fetchPromoBannerConfig();
   }, []);
 
@@ -140,28 +141,11 @@ export default function CaiDat() {
 
     try {
       if (settingsType === 'Promo Banner') {
-        // Save promo banner settings
-        const apiUrl = process.env.NEXT_PUBLIC_API_SERVER_URL || 'http://localhost:5000/api';
-        const response = await fetch(`${apiUrl}/promo-banner`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(promoBannerSettings),
+        await promoBannerService.update(promoBannerSettings);
+        setMessage({
+          type: 'success',
+          text: `${settingsType} đã được lưu thành công!`
         });
-
-        if (response.ok) {
-          setMessage({ 
-            type: 'success', 
-            text: `${settingsType} đã được lưu thành công!` 
-          });
-        } else {
-          const data = await response.json();
-          setMessage({ 
-            type: 'error', 
-            text: data.error || 'Có lỗi xảy ra khi lưu cài đặt' 
-          });
-        }
       } else {
         // Simulate API call for other settings
         await new Promise(resolve => setTimeout(resolve, 1000));

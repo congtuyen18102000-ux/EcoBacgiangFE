@@ -1,6 +1,11 @@
   /** @type {import('next').NextConfig} */
   const nextConfig = {
     reactStrictMode: true,
+    async rewrites() {
+      return [
+        { source: "/sitemap.xml", destination: "/api/sitemap" },
+      ];
+    },
     // Exclude backup folder from Next.js compilation
     webpack: (config, { isServer }) => {
       if (!isServer) {

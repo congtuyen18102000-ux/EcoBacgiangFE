@@ -12,14 +12,14 @@ const Intro = () => {
   }, []);
 
   return (
-    <section className="relative py-16 bg-white overflow-hidden">
+    <section className="relative py-8 bg-white overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute top-20 left-20 w-32 h-32 bg-green-300 rounded-full mix-blend-multiply filter blur-xl"></div>
         <div className="absolute bottom-20 right-20 w-32 h-32 bg-green-400 rounded-full mix-blend-multiply filter blur-xl"></div>
       </div>
 
-      <div className="relative container mx-auto max-w-7xl px-6">
+      <div className="relative container mx-auto px-4 md:px-0">
         {/* Section Header */}
         <div className="text-center mb-12">
           <div className={`inline-flex items-center px-4 py-2 bg-green-600 text-white text-base font-bold rounded-full shadow-lg mb-6 transition-all duration-1000 ${
@@ -28,7 +28,7 @@ const Intro = () => {
             <span className="w-2 h-2 bg-white rounded-full mr-2"></span>
             Triết Lý Sản Xuất
           </div>
-          <h2 className={`text-2xl md:text-3xl font-bold text-gray-800 mb-4 font-heading transition-all duration-1000 delay-300 ${
+          <h2 className={`text-xl md:text-3xl font-bold text-gray-800 mb-4 font-heading transition-all duration-1000 delay-300 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}>
             Sản Xuất Hữu Cơ{" "}
@@ -45,14 +45,14 @@ const Intro = () => {
             isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
           }`}>
             <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-8 shadow-lg">
-              <h3 className="text-xl md:text-2xl font-bold text-green-700 mb-6 flex items-center font-heading">
+              <h3 className="text-xl md:text-2xl font-bold text-green-700 mb-3 flex items-center font-heading">
                 <svg className="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
                 5 Nguyên Tắc KHÔNG
               </h3>
               
-              <div className="space-y-2">
+              <div className="space-y-1">
                 {[
                   "KHÔNG THUỐC BẢO VỆ THỰC VẬT HOÁ HỌC",
                   "KHÔNG PHÂN BÓN HOÁ HỌC", 

@@ -5,39 +5,42 @@ export default withAuth(
   function middleware(req) {
     const token = req.nextauth.token;
     const isAuth = !!token;
-    const isAuthPage = req.nextUrl.pathname.startsWith("/dang-nhap") || 
-                      req.nextUrl.pathname.startsWith("/dang-ky");
-    const isAdminPage = req.nextUrl.pathname.startsWith("/dashboard") ||
-                       req.nextUrl.pathname.startsWith("/admin");
+    const isAuthPage =
+      req.nextUrl.pathname.startsWith("/dang-nhap") ||
+      req.nextUrl.pathname.startsWith("/dang-ky");
+    const isAdminPage =
+      req.nextUrl.pathname.startsWith("/dashboard") ||
+      req.nextUrl.pathname.startsWith("/admin");
     const isSetupPage = req.nextUrl.pathname.startsWith("/admin/setup");
 
-    // Nếu đang truy cập trang setup admin
+    // Cho phép truy cập trang setup admin
     if (isSetupPage) {
       return NextResponse.next();
     }
 
-    // Nếu đang truy cập trang đăng nhập/đăng ký và đã đăng nhập
+    // Trang đăng nhập/đăng ký: nếu đã đăng nhập thì redirect
     if (isAuthPage) {
       if (isAuth) {
-        // Nếu là admin, chuyển đến dashboard
-        if (token.role === "admin") {
+        if (token?.role === "admin") {
           return NextResponse.redirect(new URL("/dashboard", req.url));
         }
-        // Nếu là user thường, chuyển về trang chủ
         return NextResponse.redirect(new URL("/", req.url));
       }
       return NextResponse.next();
     }
 
-    // Nếu đang truy cập trang admin mà chưa đăng nhập
+    // Trang admin/dashboard: bắt buộc đăng nhập và role admin
     if (isAdminPage) {
       if (!isAuth) {
         const callbackUrl = req.nextUrl.pathname + req.nextUrl.search;
-        return NextResponse.redirect(new URL(`/dang-nhap?callbackUrl=${encodeURIComponent(callbackUrl)}`, req.url));
+        return NextResponse.redirect(
+          new URL(
+            `/dang-nhap?callbackUrl=${encodeURIComponent(callbackUrl)}`,
+            req.url
+          )
+        );
       }
-      
-      // Nếu đã đăng nhập nhưng không phải admin
-      if (token.role !== "admin") {
+      if (token?.role !== "admin") {
         return NextResponse.redirect(new URL("/", req.url));
       }
     }
@@ -46,7 +49,14 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token,
+      // Cho phép truy cập trang đăng nhập/đăng ký khi chưa có token (tránh vòng lặp redirect)
+      authorized: ({ token, req }) => {
+        const path = req.nextUrl?.pathname || "";
+        if (path.startsWith("/dang-nhap") || path.startsWith("/dang-ky")) {
+          return true;
+        }
+        return !!token;
+      },
     },
   }
 );
@@ -54,8 +64,8 @@ export default withAuth(
 export const config = {
   matcher: [
     "/dashboard/:path*",
-    "/admin/:path*", 
+    "/admin/:path*",
     "/dang-nhap",
-    "/dang-ky"
+    "/dang-ky",
   ],
 };

@@ -195,9 +195,7 @@ export default function ReturnPolicy() {
                   Mọi sai sót (nếu có) đều là cơ hội để Eco Bắc Giang hoàn thiện hơn. 
                   Xin Quý khách đừng ngần ngại phản hồi, chúng tôi luôn lắng nghe và chịu trách nhiệm đến cùng.&quot;
                 </p>
-                <p className="text-gray-900 font-semibold text-right">
-                  — Ngô Quang Trường (Founder)
-                </p>
+              
               </div>
             </section>
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import styles from '../../styles/posts.module.css';
 
@@ -72,14 +73,15 @@ const DashboardPostCard: React.FC<DashboardPostCardProps> = ({ post, onDeleteCli
     <>
       <div className={styles.postCard}>
         {post.thumbnail && (
-          <img 
-            src={post.thumbnail} 
-            alt={post.title}
-            className={styles.postImage}
-            onError={(e) => {
-              e.currentTarget.style.display = 'none';
-            }}
-          />
+          <div className={`${styles.postImage} relative`}>
+            <Image
+              src={post.thumbnail}
+              alt={post.title}
+              fill
+              className="object-cover"
+              unoptimized
+            />
+          </div>
         )}
         <div className={styles.postContent}>
           <h3 className={styles.postTitle}>{post.title}</h3>

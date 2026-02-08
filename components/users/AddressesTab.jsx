@@ -40,7 +40,7 @@ export default function AddressesTab({ userId }) {
     if (showForm && dataAll.length === 0) {
       fetchAllData();
     }
-  }, [showForm]);
+  }, [showForm, dataAll.length]);
 
   const fetchAllData = async () => {
     try {
@@ -91,6 +91,7 @@ export default function AddressesTab({ userId }) {
 
   useEffect(() => {
     fetchAddresses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only fetch when userId changes; fetchAddresses recreated each render
   }, [userId]);
 
   const resetForm = () => {

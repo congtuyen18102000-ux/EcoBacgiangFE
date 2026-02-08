@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import useAuth from '../../../hooks/useAuth';
 import { useRouter } from 'next/router';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import { toast } from 'react-hot-toast';
-import { Download, Eye, FileText, Mail, Phone, User, Briefcase, Calendar, Filter, X } from 'lucide-react';
+import { recruitmentService } from '../../../lib/api-services';
+import { Eye, FileText, Mail, Phone, User, Briefcase, Calendar, Filter, X } from 'lucide-react';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_SERVER_URL?.replace(/\/api\/?$/, '') || '';
 
 const RecruitmentManagement = () => {
-  const { data: session, status } = useSession();
+  const { user, status } = useAuth();
   const router = useRouter();
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,7 +31,7 @@ const RecruitmentManagement = () => {
   useEffect(() => {
     if (status === 'loading') return;
     
-    if (!session || session.user.role !== 'admin') {
+    if (!user || user.role !== 'admin') {
       const currentPath = router.asPath || router.pathname;
       router.push(`/dang-nhap?callbackUrl=${encodeURIComponent(currentPath)}`);
       return;
@@ -36,21 +39,19 @@ const RecruitmentManagement = () => {
 
     fetchApplications();
     fetchStats();
-  }, [session, status, currentPage, searchTerm, statusFilter, jobTitleFilter]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchApplications/fetchStats use filters, intentional deps
+  }, [user, status, currentPage, searchTerm, statusFilter, jobTitleFilter, router]);
 
   const fetchApplications = async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams({
+      const data = await recruitmentService.list({
         page: currentPage,
         limit: 10,
         ...(searchTerm && { search: searchTerm }),
         ...(statusFilter && { status: statusFilter }),
         ...(jobTitleFilter && { jobTitle: jobTitleFilter })
       });
-
-      const response = await fetch(`/api/recruitment/list?${params}`);
-      const data = await response.json();
 
       if (data.success) {
         setApplications(data.data);
@@ -61,7 +62,7 @@ const RecruitmentManagement = () => {
       }
     } catch (error) {
       console.error('Error fetching applications:', error);
-      toast.error('Có lỗi xảy ra khi tải danh sách');
+      toast.error(error.message || 'Có lỗi xảy ra khi tải danh sách');
     } finally {
       setLoading(false);
     }
@@ -69,9 +70,7 @@ const RecruitmentManagement = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('/api/recruitment/stats');
-      const data = await response.json();
-      
+      const data = await recruitmentService.stats();
       if (data.success) {
         setStats(data.data);
       }
@@ -108,7 +107,8 @@ const RecruitmentManagement = () => {
 
   const handleViewCV = (application) => {
     if (application.cvFileName) {
-      const cvUrl = application.cvFilePath || `/uploads/recruitment/${application.cvFileName}`;
+      const path = application.cvFilePath || `/uploads/recruitment/${application.cvFileName}`;
+      const cvUrl = path.startsWith('http') ? path : `${API_BASE}${path}`;
       window.open(cvUrl, '_blank');
     } else {
       toast.error('Không có file CV');
@@ -121,25 +121,12 @@ const RecruitmentManagement = () => {
 
   const handleUpdateStatus = async (applicationId, newStatus) => {
     try {
-      const response = await fetch('/api/recruitment/update-status', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          applicationId,
-          status: newStatus
-        })
-      });
-
-      const data = await response.json();
+      const data = await recruitmentService.updateStatus(applicationId, newStatus);
 
       if (data.success) {
         toast.success('Cập nhật trạng thái thành công');
-        // Refresh applications list
         fetchApplications();
         fetchStats();
-        // Update selected application if it's the one being updated
         if (selectedApplication && selectedApplication._id === applicationId) {
           setSelectedApplication({ ...selectedApplication, status: newStatus });
         }
@@ -148,7 +135,7 @@ const RecruitmentManagement = () => {
       }
     } catch (error) {
       console.error('Error updating status:', error);
-      toast.error('Có lỗi xảy ra khi cập nhật trạng thái');
+      toast.error(error.message || 'Có lỗi xảy ra khi cập nhật trạng thái');
     }
   };
 

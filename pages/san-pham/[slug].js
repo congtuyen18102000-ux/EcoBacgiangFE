@@ -11,7 +11,7 @@ import { Leaf, Sprout, Tractor, Truck, ChevronLeft, ChevronRight } from 'lucide-
 import { FaShoppingCart } from 'react-icons/fa';
 import { FiMinus, FiPlus } from 'react-icons/fi';
 import { useDispatch, useSelector } from 'react-redux';
-import { useSession } from 'next-auth/react';
+import useAuth from '../../hooks/useAuth';
 import { addToCart, increaseQuantity, decreaseQuantity, setCart } from '../../store/cartSlice';
 import axios from 'axios';
 import parse from 'html-react-parser';
@@ -33,7 +33,7 @@ function Breadcrumb({ product }) {
 
   return (
     <nav aria-label="Breadcrumb" className="mb-4 mt-[60px] md:mt-[80px]">
-      <ol className="flex flex-wrap items-center space-x-2 text-base text-gray-600">
+      <ol className="flex flex-wrap items-center space-x-2 text-base text-gray-600 py-1">
         <li>
           <Link href="/san-pham" className="hover:text-gray-800" aria-label="Sản phẩm">
             Sản phẩm
@@ -90,7 +90,7 @@ function StarRating({ rating, uniqueId }) {
 export default function ProductDetailPage({ product, relatedProducts = [] }) {
   const router = useRouter();
   const dispatch = useDispatch();
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isContentExpanded, setIsContentExpanded] = useState(false);
@@ -164,7 +164,7 @@ export default function ProductDetailPage({ product, relatedProducts = [] }) {
       return; // Không cho phép đặt hàng nếu hết hàng
     }
     
-    const userId = session?.user?.id;
+    const userId = user?.id;
     if (userId) {
       try {
         const { cartService } = await import("../../lib/api-services");
@@ -203,17 +203,17 @@ export default function ProductDetailPage({ product, relatedProducts = [] }) {
       return; // Không cho phép tăng số lượng nếu hết hàng
     }
     
-    if (session && session.user) {
+    if (user) {
       try {
         const { cartService } = await import("../../lib/api-services");
-        const currentCart = await cartService.get(session.user.id);
+        const currentCart = await cartService.get(user.id);
         const productInCart = currentCart.products?.find(p => p.product.toString() === product._id);
         const currentQty = Number(productInCart?.quantity ?? 0);
         // Nếu đang 0.5kg và bấm "+": tăng lên 1kg trước, sau đó tăng theo 1 như cũ
         const effectiveStep = isKgUnit(unitValue) && currentQty === 0.5 ? 0.5 : 1;
         let newQuantity = normalizeQuantity(currentQty + effectiveStep, unitValue);
         if (is100gUnit(unitValue)) newQuantity = Math.min(9, Math.max(1, Math.round(newQuantity)));
-        const cart = await cartService.update(session.user.id, product._id, newQuantity);
+        const cart = await cartService.update(user.id, product._id, newQuantity);
         dispatch(setCart(cart));
         console.log("Increase quantity (API Server) success:", cart);
       } catch (error) {
@@ -228,20 +228,20 @@ export default function ProductDetailPage({ product, relatedProducts = [] }) {
 
   // Handle Decrease Quantity
   const handleDecreaseQuantity = async (step = 1) => {
-    if (session && session.user) {
+    if (user) {
       try {
         const { cartService } = await import("../../lib/api-services");
-        const currentCart = await cartService.get(session.user.id);
+        const currentCart = await cartService.get(user.id);
         const productInCart = currentCart.products?.find(p => p.product.toString() === product._id);
         const currentQty = Number(productInCart?.quantity ?? 0);
         // Logic giảm xuống 0.5kg khi đang là 1kg
         const effectiveStep = isKgUnit(unitValue) && currentQty === 1 && step === 1 ? 0.5 : step;
         const newQuantity = Math.max(0, normalizeQuantity(currentQty - effectiveStep, unitValue));
         if (newQuantity === 0) {
-          const cart = await cartService.remove(session.user.id, product._id);
+          const cart = await cartService.remove(user.id, product._id);
           dispatch(setCart(cart));
         } else {
-          const cart = await cartService.update(session.user.id, product._id, newQuantity);
+          const cart = await cartService.update(user.id, product._id, newQuantity);
           dispatch(setCart(cart));
         }
         console.log("Decrease quantity (API Server) success");
@@ -287,7 +287,7 @@ export default function ProductDetailPage({ product, relatedProducts = [] }) {
     <DefaultLayout>
       <div className="container mx-auto py-6 px-4 md:px-0">
         <Breadcrumb product={product} />
-        <div className="flex flex-col md:flex-row gap-6 max-w-7xl mx-auto">
+        <div className="flex flex-col md:flex-row gap-6">
           {/* Image Section */}
           <div className="w-full md:w-2/5">
             {images.length === 0 ? (
@@ -569,9 +569,9 @@ export default function ProductDetailPage({ product, relatedProducts = [] }) {
                 <a
                   href="tel:0866572271"
                   className="flex-1 text-center bg-red-500 text-white py-3 px-4 rounded-lg hover:bg-red-600 transition-colors font-medium"
-                  aria-label="Gọi hotline 0866572271"
+                  aria-label="Gọi hotline 0969079673"
                 >
-                  Hotline: 0866572.271
+                  Hotline: 0969.079.673
                 </a>
               </div>
             </div>
@@ -606,7 +606,7 @@ export default function ProductDetailPage({ product, relatedProducts = [] }) {
         </div>
 
         {/* Product Details Section */}
-        <div className="mt-8 max-w-6xl mx-auto">
+        <div className="mt-8">
           <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-200">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-1 h-6 bg-green-600 rounded-full"></div>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { FaBoxOpen, FaHandHoldingHeart, FaLeaf, FaTruck, FaMapMarkerAlt, FaPhone, FaEnvelope } from "react-icons/fa";
+import { FaMapMarkerAlt, FaPhone, FaEnvelope } from "react-icons/fa";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -13,35 +13,13 @@ const Footer = () => {
     setLocation({ ip: "Không xác định", city: "N/A", country: "N/A" });
   }, []);
 
-  const features = [
-    {
-      title: "Nông nghiệp thông minh",
-      description: "Vì một tương lai bền vững",
-      icon: <FaBoxOpen className="text-green-600" />,
-    },
-    {
-      title: "Thân thiện môi trường",
-      description: "Cam kết phương pháp bền vững",
-      icon: <FaHandHoldingHeart className="text-green-600" />,
-    },
-    {
-      title: "Thực phẩm tươi sạch",
-      description: "100% hữu cơ tự nhiên",
-      icon: <FaLeaf className="text-green-600" />,
-    },
-    {
-      title: "Giao hàng trong ngày",
-      description: "Tươi ngon tận nhà",
-      icon: <FaTruck className="text-green-600" />,
-    },
-  ];
 
   return (
-    <div className="bg-white">
+    <div className="bg-white mt-6 px-4 md:px-0">
 
       {/* Main Footer */}
       <footer className="bg-gradient-to-br from-green-50 to-green-100">
-        <div className="container mx-auto max-w-7xl px-6 py-4">
+        <div className="container mx-auto py-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Company Info */}
             <div className="space-y-1">
@@ -153,8 +131,8 @@ const Footer = () => {
         </div>
 
          {/* Bottom Bar */}
-         <div className="border-t border-green-200 py-4 bg-white">
-          <div className="container mx-auto px-4">
+         <div className="border-t border-gray-200 py-4 bg-white">
+          <div className="container mx-auto">
             <div className="flex flex-col md:flex-row items-center justify-between">
               <div className="text-center md:text-left mb-2 md:mb-0">
                 <p className="text-gray-600">
@@ -170,7 +148,7 @@ const Footer = () => {
                   Điều khoản sử dụng
                 </Link>
                 <Link 
-                  href="/api/sitemap.xml" 
+                  href="/sitemap.xml" 
                   className="text-gray-600 hover:text-green-600 transition-colors text-base"
                 >
                   Sơ đồ trang web
@@ -181,7 +159,7 @@ const Footer = () => {
         </div>
 
         {/* Company Brand Statement */}
-        <div className="border-t border-green-200 py-4 bg-white pb-20 md:pb-2">
+        <div className="border-t border-gray-200 py-4 bg-white pb-20 md:pb-2">
           <div className="container mx-auto px-4">
             <div className="text-center">
               <p className="text-gray-600 text-base">

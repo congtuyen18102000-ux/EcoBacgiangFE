@@ -71,7 +71,7 @@ const SubscribeSection = () => {
 
   return (
     <div
-      className="relative bg-cover bg-center text-white py-16 px-5"
+      className="relative bg-cover bg-center text-white py-16 px-4 md:px-0"
       style={{
         backgroundImage: "url('/images/11.jpg')",
       }}

@@ -1,14 +1,22 @@
-import { FC, useState, useEffect } from "react";
+import { FC, useState, useEffect, useCallback } from "react";
 import { Editor } from "@tiptap/react";
 import { BsSearch, BsArrowUp, BsArrowDown, BsX } from "react-icons/bs";
 import { BsArrowRepeat } from "react-icons/bs";
 
 interface Props {
   editor: Editor | null;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-const FindReplace: FC<Props> = ({ editor }): JSX.Element | null => {
-  const [showFindReplace, setShowFindReplace] = useState(false);
+const FindReplace: FC<Props> = ({ editor, open, onOpenChange }): JSX.Element | null => {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = open !== undefined;
+  const showFindReplace = isControlled ? open : internalOpen;
+  const setShowFindReplace = (value: boolean) => {
+    if (isControlled) onOpenChange?.(value);
+    else setInternalOpen(value);
+  };
   const [searchTerm, setSearchTerm] = useState("");
   const [replaceTerm, setReplaceTerm] = useState("");
   const [currentMatch, setCurrentMatch] = useState(0);
@@ -16,18 +24,7 @@ const FindReplace: FC<Props> = ({ editor }): JSX.Element | null => {
   const [caseSensitive, setCaseSensitive] = useState(false);
   const [wholeWord, setWholeWord] = useState(false);
 
-  useEffect(() => {
-    if (!editor) return;
-    
-    if (searchTerm) {
-      findMatches();
-    } else {
-      setTotalMatches(0);
-      setCurrentMatch(0);
-    }
-  }, [searchTerm, caseSensitive, wholeWord, editor]);
-
-  const findMatches = () => {
+  const findMatches = useCallback(() => {
     if (!editor || !searchTerm) return;
 
     try {
@@ -45,7 +42,18 @@ const FindReplace: FC<Props> = ({ editor }): JSX.Element | null => {
       setTotalMatches(0);
       setCurrentMatch(0);
     }
-  };
+  }, [editor, searchTerm, caseSensitive, wholeWord]);
+
+  useEffect(() => {
+    if (!editor) return;
+    
+    if (searchTerm) {
+      findMatches();
+    } else {
+      setTotalMatches(0);
+      setCurrentMatch(0);
+    }
+  }, [searchTerm, caseSensitive, wholeWord, editor, findMatches]);
 
   const findNext = () => {
     if (!editor || !searchTerm || totalMatches === 0) return;

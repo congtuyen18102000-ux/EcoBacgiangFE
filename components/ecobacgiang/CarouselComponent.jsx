@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
 import { Bolt, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const CarouselComponent = () => {
@@ -10,7 +11,7 @@ const CarouselComponent = () => {
       title: "Thực phẩm tươi ngon theo tiêu chuẩn hữu cơ, an tâm tuyệt đối",
       subtitle: "Khám phá nông sản Eco Bắc Giang - Vì sức khỏe và môi trường bền vững.",
       discount: "Ưu đãi đặc biệt!",
-      image: "/images/menu-banner-2.png",
+      image: "/images/menu-banner-2.webp",
     },
     {
       title: "Ứng dụng công nghệ thông minh, cho mùa vụ bội thu",
@@ -22,7 +23,7 @@ const CarouselComponent = () => {
       title: "Hướng tới tương lai xanh cùng nông nghiệp bền vững",
       subtitle: "Chọn Eco Bắc Giang là chọn sự phát triển hài hòa với thiên nhiên.",
       discount: "Cùng hành động!",
-      image: "/images/menu-banner-4.png",
+      image: "/images/menu-banner-4.webp",
     },
   ];
 
@@ -55,7 +56,7 @@ const CarouselComponent = () => {
     <div className="min-h-[calc(100vh-4rem)] flex flex-col pt-16 relative">
       {/* Top Section */}
       <div className="bg-[#f5e9d3] flex-grow flex items-center justify-center">
-        <div className="relative w-full max-w-7xl px-4">
+        <div className="relative w-full container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-center">
             <div className="w-full md:w-3/5 p-6 text-center">
               <h2 className="text-2xl md:text-4xl font-bold text-green-800 mb-5 uppercase">
@@ -68,11 +69,12 @@ const CarouselComponent = () => {
               {slides[currentSlide].discount}
               </button>
             </div>
-            <div className="relative w-full md:w-2/5 flex justify-center  md:mt-0">
-              <img
+            <div className="relative w-full md:w-2/5 flex justify-center md:mt-0 h-80 md:h-96">
+              <Image
                 src={slides[currentSlide].image}
                 alt="Slide"
-                className="w-full h-80 md:h-96 object-contain"
+                fill
+                className="object-contain"
               />
             </div>
           </div>

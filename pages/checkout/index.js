@@ -7,7 +7,7 @@ import { Toaster, toast } from "react-hot-toast";
 import { FiMinus, FiPlus } from "react-icons/fi";
 import Navbar from "../../components/header/Navbar";
 import DefaultLayout2 from "../../components/layout/DefaultLayout2";
-import { useSession } from "next-auth/react";
+import useAuth from "../../hooks/useAuth";
 import { useRouter } from "next/router";
 import axios from "axios";
 import { userService, cartService, checkoutService, paymentService, couponService } from "../../lib/api-services";
@@ -19,14 +19,15 @@ import {
   removeFromCart,
 } from "../../store/cartSlice";
 import { AiOutlineClose } from "react-icons/ai";
-import EditAddressPopup from "../../components/fontend/common/EditAddressPopup";
-import SelectAddressPopup from "../../components/fontend/common/SelectAddressPopup";
+import EditAddressPopup from "../../components/common/EditAddressPopup";
+import SelectAddressPopup from "../../components/common/SelectAddressPopup";
 import { io } from "socket.io-client";
 
 export default function Cart() {
   const dispatch = useDispatch();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { user, isAuthenticated } = useAuth();
+  const session = React.useMemo(() => (user ? { user } : null), [user]);
   const {
     cartItems,
     coupon: appliedCoupon,
@@ -55,10 +56,10 @@ export default function Cart() {
   // Debug useEffect để kiểm tra component mount
   useEffect(() => {
     console.log("=== COMPONENT MOUNTED ===");
-    console.log("Session:", !!session?.user?.id);
+    console.log("Session:", !!user?.id);
     console.log("Cart Items:", cartItems.length);
     console.log("Payment Method:", paymentMethod);
-  }, [cartItems.length, paymentMethod, session?.user?.id]);
+  }, [cartItems.length, paymentMethod, user?.id]);
   const totalPrice = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
@@ -178,33 +179,18 @@ export default function Cart() {
   // Lấy thông tin người dùng (bao gồm địa chỉ)
   useEffect(() => {
     async function fetchUserInfo() {
-      if (session?.user?.id) {
+      if (user?.id) {
         try {
-          // Thử dùng API server mới trước
-          try {
-            const { user } = await userService.getById(session.user.id);
-            setName(user.name || "");
-            setPhone(user.phone || user.address?.[0]?.phoneNumber || "");
-            if (user.address && user.address.length > 0) {
-              setAddresses(user.address);
-              const defaultAddr =
-                user.address.find((addr) => addr.isDefault) ||
-                user.address[0];
-              setSelectedAddress(defaultAddr);
-            }
-          } catch (apiError) {
-            // Fallback về Next.js API
-            const res = await axios.get(`/api/user/${session.user.id}`);
-            const userData = res.data;
-            setName(userData.name || "");
-            setPhone(userData.phone || userData.address?.[0]?.phoneNumber || "");
-            if (userData.address && userData.address.length > 0) {
-              setAddresses(userData.address);
-              const defaultAddr =
-                userData.address.find((addr) => addr.isDefault) ||
-                userData.address[0];
-              setSelectedAddress(defaultAddr);
-            }
+          const response = await userService.getById(user.id);
+          const userData = response.user || response;
+          setName(userData.name || "");
+          setPhone(userData.phone || userData.address?.[0]?.phoneNumber || "");
+          if (userData.address && userData.address.length > 0) {
+            setAddresses(userData.address);
+            const defaultAddr =
+              userData.address.find((addr) => addr.isDefault) ||
+              userData.address[0];
+            setSelectedAddress(defaultAddr);
           }
         } catch (error) {
           console.error("Error fetching user info:", error);
@@ -213,14 +199,14 @@ export default function Cart() {
       }
     }
     fetchUserInfo();
-  }, [session]);
+  }, [user]);
 
   // Đồng bộ mã giảm giá từ Redux (chỉ khi Redux có coupon và local state chưa có)
   useEffect(() => {
     // Chỉ sync từ Redux nếu:
     // 1. Có session và có coupon trong Redux
     // 2. Local state chưa có coupon hoặc discount = 0
-    if (session?.user?.id && appliedCoupon && appliedCoupon.trim() !== '') {
+    if (user?.id && appliedCoupon && appliedCoupon.trim() !== '') {
       // Chỉ update nếu local state khác với Redux
       if (coupon !== appliedCoupon || discount !== reduxDiscount) {
         console.log("🔄 Syncing coupon from Redux:", appliedCoupon, "discount:", reduxDiscount);
@@ -231,15 +217,15 @@ export default function Cart() {
     // KHÔNG tự động reset coupon khi Redux không có coupon
     // Chỉ reset khi user tự xóa qua handleRemoveCoupon
     // Điều này đảm bảo coupon được giữ lại khi thay đổi số lượng
-  }, [session?.user?.id, appliedCoupon, reduxDiscount, coupon, discount]);
+  }, [user?.id, appliedCoupon, reduxDiscount, coupon, discount]);
 
   // Các hàm xử lý giỏ hàng
   const handleIncreaseQuantity = async (item, step = 1) => {
 
-    if (session?.user?.id) {
+    if (user?.id) {
       try {
         // Chỉ dùng Server API
-        const currentCart = await cartService.get(session.user.id);
+        const currentCart = await cartService.get(user.id);
         const productInCart = currentCart.products?.find(p => p.product.toString() === item.product);
         const currentQty = Number(productInCart?.quantity ?? 0);
         // Nếu đang 0.5kg và bấm "+": tăng lên 1kg trước, sau đó tăng theo 1 như cũ
@@ -247,7 +233,7 @@ export default function Cart() {
           isKgUnit(item.unit) && step === 1 && currentQty === 0.5 ? 0.5 : step;
         let newQuantity = normalizeQuantity(currentQty + effectiveStep, item.unit);
         if (is100gUnit(item.unit)) newQuantity = Math.min(9, Math.max(1, Math.round(newQuantity)));
-        const cart = await cartService.update(session.user.id, item.product, newQuantity);
+        const cart = await cartService.update(user.id, item.product, newQuantity);
         
         // Giữ lại coupon nếu đã có (từ cart hoặc local state)
         const currentCoupon = cart.coupon || coupon;
@@ -255,7 +241,7 @@ export default function Cart() {
         
         if (currentCoupon && currentDiscount > 0) {
           // Cập nhật lại cart với coupon hiện tại; backend sẽ tự tính totalAfterDiscount
-          const updatedCart = await cartService.applyCoupon(session.user.id, {
+          const updatedCart = await cartService.applyCoupon(user.id, {
             coupon: currentCoupon,
           });
           dispatch(setCart(updatedCart));
@@ -301,10 +287,10 @@ export default function Cart() {
     if (Number(item.quantity) === minQuantity) {
       setConfirmDeleteItem(item.product);
     } else {
-      if (session?.user?.id) {
+      if (user?.id) {
         try {
           // Chỉ dùng Server API
-        const currentCart = await cartService.get(session.user.id);
+        const currentCart = await cartService.get(user.id);
         const productInCart = currentCart.products?.find(p => p.product.toString() === item.product);
         const currentQty = Number(productInCart?.quantity ?? 0);
         // Logic giảm xuống 0.5kg khi đang là 1kg
@@ -313,7 +299,7 @@ export default function Cart() {
           0,
           normalizeQuantity(currentQty - effectiveStep, item.unit)
         );
-          const cart = await cartService.update(session.user.id, item.product, newQuantity);
+          const cart = await cartService.update(user.id, item.product, newQuantity);
           
           // Giữ lại coupon nếu đã có (từ cart hoặc local state)
           const currentCoupon = cart.coupon || coupon;
@@ -321,7 +307,7 @@ export default function Cart() {
           
           if (currentCoupon && currentDiscount > 0) {
             // Cập nhật lại cart với coupon hiện tại; backend sẽ tự tính totalAfterDiscount
-            const updatedCart = await cartService.applyCoupon(session.user.id, {
+            const updatedCart = await cartService.applyCoupon(user.id, {
               coupon: currentCoupon,
             });
             dispatch(setCart(updatedCart));
@@ -358,11 +344,11 @@ export default function Cart() {
   };
 
   const handleRemoveItem = async (item) => {
-    if (session?.user?.id) {
+    if (user?.id) {
       try {
         // Chỉ dùng Server API
-        await cartService.remove(session.user.id, item.product);
-        const updatedCart = await cartService.get(session.user.id);
+        await cartService.remove(user.id, item.product);
+        const updatedCart = await cartService.get(user.id);
         
         // Giữ lại coupon nếu đã có (từ cart hoặc local state)
         const currentCoupon = updatedCart.coupon || coupon;
@@ -370,7 +356,7 @@ export default function Cart() {
         
         if (currentCoupon && currentDiscount > 0) {
           // Cập nhật lại cart với coupon hiện tại; backend sẽ tự tính totalAfterDiscount
-          const finalCart = await cartService.applyCoupon(session.user.id, {
+          const finalCart = await cartService.applyCoupon(user.id, {
             coupon: currentCoupon,
           });
           dispatch(setCart(finalCart));
@@ -409,7 +395,7 @@ export default function Cart() {
   // Xử lý mã giảm giá
   const handleApplyCoupon = async () => {
     setLoadingCoupon(true);
-    if (!session?.user?.id) {
+    if (!user?.id) {
       toast.error("Vui lòng đăng nhập để áp dụng mã giảm giá.");
       setLoadingCoupon(false);
       return;
@@ -423,7 +409,7 @@ export default function Cart() {
     try {
       // Chỉ dùng Server API - backend sẽ validate (date + limit/per-user) và tự tính discount/totalAfterDiscount
       const code = coupon.toUpperCase();
-      const cart = await cartService.applyCoupon(session.user.id, {
+      const cart = await cartService.applyCoupon(user.id, {
         coupon: code,
       });
 
@@ -466,10 +452,10 @@ export default function Cart() {
   };
 
   const handleRemoveCoupon = async () => {
-    if (session?.user?.id) {
+    if (user?.id) {
       try {
         // Chỉ dùng Server API
-        const cart = await cartService.applyCoupon(session.user.id, {
+        const cart = await cartService.applyCoupon(user.id, {
           coupon: "",
         });
 
@@ -515,7 +501,7 @@ export default function Cart() {
 
   // Tạo thanh toán (Sepay/MoMo)
   const handleCreatePayment = useCallback(async () => {
-    if (!session?.user?.id) {
+    if (!user?.id) {
       toast.error("Vui lòng đăng nhập để sử dụng thanh toán online");
       setPaymentMethod("COD");
       return;
@@ -532,7 +518,7 @@ export default function Cart() {
       let res;
       if (paymentMethod === "Sepay") {
         // Tạo nội dung chuyển khoản: "Thanh toan" + Tên khách hàng + Ngày đặt
-        const customerName = name || session?.user?.name || "Khach hang";
+        const customerName = name || user?.name || "Khach hang";
         const orderDate = new Date().toLocaleDateString('vi-VN'); // Format: dd/mm/yyyy
         const transferContent = `Thanh toan ${customerName} ${orderDate}`;
         
@@ -622,7 +608,7 @@ export default function Cart() {
     } finally {
       setLoadingPayment(false);
     }
-  }, [session?.user?.id, session?.user?.name, cartItems.length, paymentMethod, name, finalTotal]);
+  }, [user?.id, user?.name, cartItems.length, paymentMethod, name, finalTotal]);
 
   // Refresh QR code cho Sepay
   const handleRefreshQR = async () => {
@@ -910,10 +896,10 @@ export default function Cart() {
   // Xử lý khi thay đổi phương thức thanh toán
   useEffect(() => {
     if (paymentMethod === "Sepay") {
-      if (session?.user?.id && cartItems.length > 0) {
+      if (user?.id && cartItems.length > 0) {
         handleCreatePayment();
       } else {
-        if (!session?.user?.id) {
+        if (!user?.id) {
           toast.error("Vui lòng đăng nhập để sử dụng thanh toán online");
           setPaymentMethod("COD");
         } else if (cartItems.length === 0) {
@@ -927,7 +913,7 @@ export default function Cart() {
       setPayUrl("");
       setIsPaid(false);
     }
-  }, [paymentMethod, session?.user?.id, cartItems.length, handleCreatePayment]);
+  }, [paymentMethod, user?.id, cartItems.length, handleCreatePayment]);
 
   // Ref để theo dõi tổng tiền trước đó
   const prevFinalTotalRef = useRef(finalTotal);
@@ -939,7 +925,7 @@ export default function Cart() {
 
     // Chỉ tạo lại payment nếu tổng tiền thực sự thay đổi và đã có paymentCode
     if (paymentMethod === "Sepay") {
-      if (session?.user?.id && cartItems.length > 0 && finalTotal > 0) {
+      if (user?.id && cartItems.length > 0 && finalTotal > 0) {
         if (paymentCode && !loadingPayment && prevTotal !== finalTotal && prevTotal > 0) {
           console.log("=== TOTAL CHANGED - AUTO REFRESHING QR CODE ===");
           console.log("Old total:", prevTotal);
@@ -954,7 +940,7 @@ export default function Cart() {
         }
       }
     }
-  }, [finalTotal, paymentMethod, session?.user?.id, cartItems.length, paymentCode, loadingPayment, handleCreatePayment]);
+  }, [finalTotal, paymentMethod, user?.id, cartItems.length, paymentCode, loadingPayment, handleCreatePayment]);
 
   // Auto checkout khi thanh toán thành công
   useEffect(() => {
@@ -978,7 +964,7 @@ export default function Cart() {
 
         try {
           const orderData = {
-            user: session ? session.user.id : null,
+            user: session ? user.id : null,
             orderItems: cartItems,
             shippingAddress: selectedAddress
               ? {
@@ -1029,7 +1015,7 @@ export default function Cart() {
     };
 
     autoCheckout();
-  }, [isPaid, checkoutCompleted, autoCheckoutLoading, paymentMethod, session, name, phone, selectedAddress, address, cartItems, note, coupon, discount, totalPrice, finalTotalAfterDiscount, finalTotal, shippingFee, paymentCode, deliveryTime, dispatch]);
+  }, [isPaid, checkoutCompleted, autoCheckoutLoading, paymentMethod, session, user, name, phone, selectedAddress, address, cartItems, note, coupon, discount, totalPrice, finalTotalAfterDiscount, finalTotal, shippingFee, paymentCode, deliveryTime, dispatch]);
 
   // --- Đặt hàng: chỉ cho Sepay nếu đã isPaid === true ---
   const handleCheckout = async () => {
@@ -1049,7 +1035,7 @@ export default function Cart() {
       return;
     }
     const orderData = {
-      user: session ? session.user.id : null,
+      user: session ? user.id : null,
       orderItems: cartItems,
       shippingAddress: selectedAddress
         ? {
@@ -1153,7 +1139,7 @@ export default function Cart() {
   };
 
   const confirmDeleteAddressHandler = async () => {
-    if (session?.user?.id) {
+    if (user?.id) {
       try {
         // Use Server API (Next.js /api/address is disabled)
         const { addressService } = await import("../../lib/api-services");
@@ -1191,11 +1177,11 @@ export default function Cart() {
 
   // Xóa sản phẩm
   const confirmDeleteItemHandler = async () => {
-    if (session?.user?.id) {
+    if (user?.id) {
       try {
         // Chỉ dùng Server API
-        await cartService.remove(session.user.id, confirmDeleteItem);
-        const updatedCart = await cartService.get(session.user.id);
+        await cartService.remove(user.id, confirmDeleteItem);
+        const updatedCart = await cartService.get(user.id);
         dispatch(setCart(updatedCart));
         toast.success("Đã xóa sản phẩm khỏi giỏ hàng!");
       } catch (error) {
@@ -1281,7 +1267,7 @@ export default function Cart() {
         )}
 
         {/* Layout 2 cột */}
-        <div className="max-w-6xl mx-auto bg-white shadow-lg rounded-xl p-0 md:p-3 pb-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="container mx-auto bg-white shadow-lg rounded-xl p-0 md:p-3 pb-12 grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Cột trái: Sản phẩm */}
           <div className="md:col-span-2">
             <div className="bg-white rounded-xl border border-gray-100 p-3">
@@ -1715,23 +1701,23 @@ export default function Cart() {
                         <button
                           onClick={() => {
                             console.log("=== MANUAL CREATE QR CLICKED ===");
-                            if (session?.user?.id && cartItems.length > 0) {
+                            if (user?.id && cartItems.length > 0) {
                               handleCreatePayment();
                             } else {
                               console.log("Cannot create - missing session or cart");
                             }
                           }}
                           className="w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-medium rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-                          disabled={!session?.user?.id || cartItems.length === 0}
+                          disabled={!user?.id || cartItems.length === 0}
                         >
                           <span className="flex items-center justify-center">
                             <span className="mr-2">🔄</span>
                             Tạo mã QR thanh toán
                           </span>
                         </button>
-                        {(!session?.user?.id || cartItems.length === 0) && (
+                        {(!user?.id || cartItems.length === 0) && (
                           <p className="text-xs text-red-500 mt-2 text-center bg-red-50 p-2 rounded">
-                            {!session?.user?.id ? "Vui lòng đăng nhập" : "Giỏ hàng trống"}
+                            {!user?.id ? "Vui lòng đăng nhập" : "Giỏ hàng trống"}
                           </p>
                         )}
                       </div>

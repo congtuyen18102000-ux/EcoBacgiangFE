@@ -87,11 +87,13 @@ const ThumbnailSelector: FC<Props> = ({
         {/* Thumbnail display - Click to upload */}
         <label htmlFor="thumbnail" className="cursor-pointer flex-1">
           {selectedThumbnail ? (
-            <div className="thumbnail-section compact hover:opacity-80 transition-opacity">
-              <img
+            <div className="thumbnail-section compact hover:opacity-80 transition-opacity relative aspect-video min-h-[120px]">
+              <Image
                 src={selectedThumbnail}
                 alt="Thumbnail"
-                className="w-full h-full object-cover rounded"
+                fill
+                className="object-cover rounded"
+                unoptimized
               />
             </div>
           ) : (

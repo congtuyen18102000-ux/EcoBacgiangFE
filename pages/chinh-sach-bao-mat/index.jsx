@@ -154,7 +154,7 @@ export default function PrivacyPolicy() {
                 <div className="bg-white border border-gray-200 rounded-lg p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">• Đơn vị vận chuyển:</h3>
                   <p className="text-gray-700">
-                    Chúng tôi cần cung cấp Tên, Số điện thoại và Địa chỉ của Quý khách cho đối tác giao hàng (như Grab, AhaMove, Giao Hàng Tiết Kiệm...) để họ thực hiện việc giao nhận.
+                    Chúng tôi cần cung cấp Tên, Số điện thoại và Địa chỉ của Quý khách cho đối tác giao hàng để họ thực hiện việc giao nhận.
                   </p>
                 </div>
 
@@ -223,27 +223,27 @@ export default function PrivacyPolicy() {
               </p>
               
               <div className="bg-white rounded-lg p-6 space-y-3">
-                <div className="flex items-start">
+                <div className=" items-start">
                   <strong className="min-w-[180px] text-gray-900">Đơn vị quản lý:</strong>
-                  <span className="text-gray-700">Hợp tác xã Nông nghiệp thông minh Eco Bắc Giang</span>
+                  <span className="text-gray-700"> Hợp tác xã Nông nghiệp thông minh Eco Bắc Giang</span>
                 </div>
-                <div className="flex items-start">
+                <div className=" items-start">
                   <strong className="min-w-[180px] text-gray-900">Địa chỉ:</strong>
-                  <span className="text-gray-700">Tân An, Yên Dũng, Bắc Giang.</span>
+                  <span className="text-gray-700"> Tân An, Yên Dũng, Bắc Giang.</span>
                 </div>
-                <div className="flex items-center">
+                <div className=" items-center">
                   <strong className="min-w-[180px] text-gray-900">Hotline:</strong>
-                  <span className="text-green-700 font-semibold text-lg">0969.079.673</span>
+                  <span className="text-green-700 font-semibold text-lg"> 0969.079.673</span>
                 </div>
-                <div className="flex items-center">
+                <div className=" items-center">
                   <strong className="min-w-[180px] text-gray-900">Email:</strong>
-                  <span className="text-gray-700">lienhe@ecobacgiang.vn</span>
+                  <span className="text-gray-700"> lienhe@ecobacgiang.vn</span>
                 </div>
               </div>
             </section>
 
             {/* Footer Message */}
-            <div className="text-center bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-8 border-2 border-green-200">
+            <div className="text-center bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-1">
               <p className="text-xl text-gray-800 font-semibold italic">
                 Sự tin tưởng của Quý khách là tài sản quý giá nhất của Eco Bắc Giang.
               </p>

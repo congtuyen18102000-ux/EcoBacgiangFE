@@ -7,8 +7,6 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import Editor, { FinalPost } from "../../../../components/editor";
 import AdminLayout from "../../../../components/layout/AdminLayout";
-import db from "../../../../utils/db";
-import Post from "../../../../models/Post";
 import { generateFormData } from "../../../../utils/helper";
 
 interface PostResponse extends FinalPost {
@@ -87,33 +85,41 @@ export const getServerSideProps: GetServerSideProps<ServerSideResponse> = async 
 ): Promise<{ props: ServerSideResponse } | { notFound: true }> => {
   try {
     const slug = context.query.slug as string;
+    const apiUrl = process.env.NEXT_PUBLIC_API_SERVER_URL;
+    if (!apiUrl) {
+      console.error("NEXT_PUBLIC_API_SERVER_URL is not set");
+      return { notFound: true };
+    }
 
-    await db.connectDb();
-    const post = await Post.findOne({ slug });
+    const res = await fetch(`${apiUrl}/posts/${encodeURIComponent(slug)}`);
+    if (!res.ok) return { notFound: true };
+
+    const data = await res.json();
+    const post = data.post;
     if (!post) return { notFound: true };
 
-    const { _id, meta, title, content, thumbnail, tags, category } = post;
+    const tagsStr = Array.isArray(post.tags) ? post.tags.join(", ") : (post.tags || "");
+    const thumbnailUrl = post.thumbnail?.url ?? post.thumbnail ?? "";
 
     return {
       props: {
         post: {
-          id: _id.toString(),
-          title,
-          content,
-          tags: tags.join(", "),
-          thumbnail: thumbnail?.url || "",
-          slug,
-          category,
-          meta,
+          id: post._id?.toString() || post.id || "",
+          title: post.title || "",
+          content: post.content || "",
+          tags: tagsStr,
+          thumbnail: thumbnailUrl,
+          slug: post.slug || slug,
+          category: post.category || "",
+          meta: post.meta || "",
           focusKeyword: "",
+          isFeatured: post.isFeatured === true,
         },
       },
     };
   } catch (error) {
     console.error("getServerSideProps error:", error);
     return { notFound: true };
-  } finally {
-    await db.disconnectDb();
   }
 };
 

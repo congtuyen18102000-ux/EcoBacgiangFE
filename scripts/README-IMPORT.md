@@ -1,4 +1,4 @@
-# Hướng dẫn Import Sản phẩm từ JSON vào Database
+# Hướng dẫn Import Sản phẩm từ JSON qua Backend (BE)
 
 ## File đã tạo
 
@@ -8,24 +8,27 @@
    - 6 sản phẩm Thực phẩm khô
    - 6 sản phẩm Sản phẩm OCOP
 
-2. **`scripts/import-products.js`** - Script để import sản phẩm vào MongoDB
+2. **`scripts/import-products.js`** - Script gọi **BE API** (POST /api/products) để import sản phẩm. Không dùng MongoDB/model trực tiếp từ FE.
 
 ## Cách sử dụng
 
 ### Cách 1: Sử dụng script tự động (Khuyến nghị)
 
-1. Đảm bảo MongoDB đang chạy và có biến môi trường `MONGODB_URI` được cấu hình
+1. Đảm bảo **Backend (ecobacgiangBE)** đang chạy.
 
-2. Chạy script:
+2. Cấu hình biến môi trường (trong `.env` hoặc `.env.local`):
+   - `API_SERVER_URL` hoặc `NEXT_PUBLIC_API_SERVER_URL` (ví dụ: `http://localhost:5000/api`)
+   - (Tùy chọn) `API_ADMIN_TOKEN` hoặc `TOKEN` nếu BE yêu cầu auth cho POST /products
+
+3. Chạy script:
 ```bash
 node scripts/import-products.js
 ```
 
-3. Script sẽ:
-   - Kết nối đến MongoDB
+4. Script sẽ:
    - Đọc file `sample-products.json`
-   - Kiểm tra sản phẩm đã tồn tại (theo `maSanPham` hoặc `slug`)
-   - Import các sản phẩm mới
+   - Gửi từng sản phẩm lên BE qua POST `/api/products`
+   - Bỏ qua sản phẩm đã tồn tại (BE trả 400)
    - Hiển thị kết quả và lỗi (nếu có)
 
 ### Cách 2: Import thủ công qua MongoDB Compass
@@ -85,14 +88,13 @@ Sau khi import thành công, bạn có thể kiểm tra:
 
 ## Troubleshooting
 
-### Lỗi kết nối database
-- Kiểm tra MongoDB đang chạy
-- Kiểm tra `MONGODB_URI` trong file `.env`
-- Kiểm tra quyền truy cập database
+### Lỗi kết nối / Failed to fetch
+- Kiểm tra Backend (ecobacgiangBE) đang chạy
+- Kiểm tra `API_SERVER_URL` hoặc `NEXT_PUBLIC_API_SERVER_URL` trong `.env` (ví dụ: `http://localhost:5000/api`)
 
-### Lỗi duplicate key
-- Script tự động bỏ qua sản phẩm trùng lặp
-- Nếu muốn import lại, xóa sản phẩm cũ hoặc thay đổi `maSanPham`/`slug`
+### Lỗi duplicate / đã tồn tại
+- Script tự động bỏ qua sản phẩm trùng (BE trả 400)
+- Nếu muốn import lại, xóa sản phẩm cũ trên BE hoặc thay đổi `maSanPham`/`slug` trong JSON
 
 ### Lỗi validation
 - Kiểm tra tất cả các trường required đã có

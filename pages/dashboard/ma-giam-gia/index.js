@@ -1,6 +1,6 @@
 import React from 'react'
 import AdminLayout from '../../../components/layout/AdminLayout'
-import CouponForm from '../../../components/coupon/CouponForm'
+import CouponForm from '../../../components/common/CouponForm'
 
 export default function index() {
   return (

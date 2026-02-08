@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import Editor, { FinalPost } from "../../../components/editor";
 import AdminLayout from "../../../components/layout/AdminLayout";
 import { generateFormData } from "../../../utils/helper";
-import Heading from "../../../components/backend/Heading";
+import { Heading } from "../../../components/admin/dashboard";
 interface Props {}
 
 const Create: NextPage<Props> = () => {

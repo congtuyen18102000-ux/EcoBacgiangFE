@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import ProductCard from '../product/ProductCard';
-import Link from 'next/link';
+import ProductCard from '../products/ProductCard';
+import Link from 'next/link'; 
 
 const ProductSlider = ({ title, products, viewAllLink }) => {
   const scrollContainerRef = useRef(null);
@@ -38,7 +38,7 @@ const ProductSlider = ({ title, products, viewAllLink }) => {
 
   return (
     <section className="py-6 md:py-8 bg-white mt-8">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg md:text-xl font-bold text-gray-900">{title}</h2>
           {viewAllLink && (

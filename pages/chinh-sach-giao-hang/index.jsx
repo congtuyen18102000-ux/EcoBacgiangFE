@@ -267,7 +267,7 @@ export default function ShippingPolicy() {
                 {/* Founder Quote */}
                 <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-lg p-6 mt-6">
                   <p className="text-gray-700 italic text-lg leading-relaxed">
-                    &quot;Chúng tôi thà chịu thiệt chứ không để Khách hàng chịu thiệt.&quot; - Đó là lời hứa từ Founder Ngô Quang Trường.
+                    &quot;Chúng tôi thà chịu thiệt chứ không để Khách hàng chịu thiệt.&quot; - Đó là lời hứa từ Founder Eco Bắc Giang.
                   </p>
                 </div>
               </div>
@@ -298,8 +298,8 @@ export default function ShippingPolicy() {
             </section>
 
             {/* Footer Message */}
-            <div className="text-center bg-gray-50 rounded-lg p-8">
-              <p className="text-lg text-gray-700 font-medium">
+            <div className="text-center">
+              <p className="text-lg text-gray-700 font-bold">
                 Eco Bắc Giang xin chân thành cảm ơn sự tin tưởng và đồng hành của Quý khách!
               </p>
             </div>

@@ -66,7 +66,6 @@ export default function LienHe({ meta }) {
       <h1 className="visually-hidden">
         Liên hệ Eco Bắc Giang - Tư vấn sản phẩm nông sản hữu cơ
       </h1>
-      
       <ContactPage />
     </DefaultLayout>
   );

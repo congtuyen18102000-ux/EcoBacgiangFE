@@ -2,9 +2,8 @@ import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import Image from "next/image";
-import { AiOutlineClose, AiOutlineDown, AiOutlineUp } from "react-icons/ai";
-import { FaRegUser, FaHeart, FaFacebook, FaTwitter, FaLinkedin, FaInstagram,FaChevronUp,FaAngleDown  } from "react-icons/fa";
-import { IoCartOutline } from "react-icons/io5";
+import { AiOutlineClose, } from "react-icons/ai";
+import { FaFacebook, FaTwitter, FaLinkedin, FaInstagram,FaChevronUp,FaAngleDown  } from "react-icons/fa";
 import logo from "../../public/logoecobacgiang.png";
 
 const ResponsiveMenu = ({ isOpen, toggleMenu }) => {
@@ -73,33 +72,9 @@ const ResponsiveMenu = ({ isOpen, toggleMenu }) => {
             >
               <AiOutlineClose
                 size={24}
-                className="text-white group-hover:scale-110 transition-transform duration-300"
+                className="text-gray-700 group-hover:scale-110 transition-transform duration-300"
               />
             </button>
-          </div>
-        </div>
-
-        {/* Enhanced Search */}
-        <div className="p-6 border-b border-gray-200 bg-white">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Tìm kiếm sản phẩm..."
-              className="w-full px-4 py-3 pl-12 bg-gray-50 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent shadow-sm transition-all duration-300"
-            />
-            <svg
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
           </div>
         </div>
 
@@ -164,10 +139,10 @@ const ResponsiveMenu = ({ isOpen, toggleMenu }) => {
           </h3>
           <div className="flex justify-center space-x-6">
             {[
-              { icon: FaFacebook, color: "hover:text-blue-600", href: "#" },
-              { icon: FaTwitter, color: "hover:text-blue-400", href: "#" },
-              { icon: FaLinkedin, color: "hover:text-blue-700", href: "#" },
-              { icon: FaInstagram, color: "hover:text-pink-600", href: "#" }
+              { icon: FaFacebook, color: "hover:text-blue-600", href: "https://www.facebook.com/ecobacgiang " },
+              { icon: FaTwitter, color: "hover:text-blue-400", href: "https://twitter.com/ecobacgiang" },
+              { icon: FaLinkedin, color: "hover:text-blue-700", href: "https://www.linkedin.com/company/ecobacgiang" },
+              { icon: FaInstagram, color: "hover:text-pink-600", href: "https://www.instagram.com/ecobacgiang" }
             ].map((social, index) => (
               <Link
                 key={index}

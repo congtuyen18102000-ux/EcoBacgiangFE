@@ -118,7 +118,7 @@ export default function LogoMeaning() {
           <div className="absolute bottom-0 left-0 w-72 h-72 bg-green-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-4000"></div>
         </div>
 
-        <div className="relative container mx-auto max-w-7xl">
+        <div className="relative container mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Text Section */}
             <div className="space-y-8">
@@ -176,8 +176,8 @@ export default function LogoMeaning() {
       {/* Content Sections */}
       <div className="bg-white">
         {/* Ý nghĩa và thông điệp chính */}
-        <div className="py-6 px-6">
-          <div className="container mx-auto max-w-7xl">
+        <div className="py-6 ">
+          <div className="container mx-auto px-4 md:px-0">
             <div className="text-center mb-6">
               <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
                 Ý Nghĩa Và <span className="text-green-600">Thông Điệp</span>
@@ -253,7 +253,7 @@ export default function LogoMeaning() {
 
         {/* Màu sắc và hình khối */}
         <div className="py-6">
-          <div className="container mx-auto max-w-7xl">
+          <div className="container mx-auto px-4 md:px-0">
             <div className="text-center mb-6">
               <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
                 Màu Sắc Và <span className="text-green-600">Hình Khối</span>
@@ -261,7 +261,7 @@ export default function LogoMeaning() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div className="space-y-6 px-6">
+              <div className="space-y-6">
                 <div className="bg-white rounded-2xl p-6 shadow-lg border border-green-100">
                   <h3 className="text-lg font-bold text-green-700 mb-3 flex items-center">
                     <div className="w-4 h-4 bg-green-600 rounded-full mr-3"></div>
@@ -317,7 +317,7 @@ export default function LogoMeaning() {
 
         {/* Biểu tượng và hình học */}
         <div className="py-8 px-6">
-          <div className="container mx-auto max-w-7xl">
+          <div className="container mx-auto">
             <div className="text-center mb-6">
               <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4">
                 Biểu Tượng Và <span className="text-green-600">Hình Học</span>
@@ -377,8 +377,8 @@ export default function LogoMeaning() {
         </div>
 
         {/* Kết luận */}
-        <div className="py-6 px-6">
-          <div className="container mx-auto max-w-7xl text-center">
+        <div className="py-6 px-6 mb-8">
+          <div className="container mx-auto text-center">
             <h2 className="text-2xl md:text-3xl font-bold text-green-700 mb-3">
               Kết Luận
             </h2>

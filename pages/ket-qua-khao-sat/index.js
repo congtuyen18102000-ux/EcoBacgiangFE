@@ -47,7 +47,7 @@ export default function KhaosatResults() {
           content="Xem kết quả khảo sát về trải nghiệm với chương trình 'Những Người Kiến Tạo' của Eco Bắc Giang, tổng hợp ý kiến đóng góp từ cộng đồng."
         />
         <meta name="keywords" content="Eco Bắc Giang, kết quả khảo sát, crowdfunding, startup, cộng đồng" />
-        <meta name="author" content="Ngô Quang Trường" />
+        <meta name="author" content="Eco Bắc Giang" />
         <meta name="robots" content="index, follow" />
         <meta property="og:title" content="Kết quả Khảo sát Eco Bắc Giang - Những Người Kiến Tạo" />
         <meta

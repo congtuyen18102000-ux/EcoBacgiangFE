@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import ProductCard from '../product/ProductCard';
+import ProductCard from '../products/ProductCard';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const MonthlySales = () => {
@@ -10,8 +10,22 @@ const MonthlySales = () => {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isInView, setIsInView] = useState(false);
+  const sectionRef = useRef(null);
   const productsPerPage = 5;
   const swipeThreshold = 50;
+
+  // Hiện nút điều hướng khi section vào viewport (mobile); desktop vẫn dùng hover
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsInView(entry.isIntersecting),
+      { threshold: 0.2, rootMargin: '0px 0px -10% 0px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const fetchBestsellers = async () => {
@@ -124,7 +138,7 @@ const MonthlySales = () => {
   const step = totalSlides > maxDots ? Math.floor(totalSlides / maxDots) : 1;
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-6">
+    <div ref={sectionRef} className="w-full container mx-auto py-6 px-4 md:px-0">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Bán chạy hàng tháng</h2>
         <Link href="/san-pham" className="text-blue-600 text-base font-medium hover:underline mt-2 hidden md:block">
@@ -182,7 +196,7 @@ const MonthlySales = () => {
               onClick={handlePrev}
               tabIndex={0}
               onKeyDown={(e) => e.key === 'Enter' && handlePrev()}
-              className="absolute top-1/2 left-0 transform -translate-y-1/2 bg-gray-800 bg-opacity-50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+              className={`absolute top-1/2 left-0 -translate-y-1/2 bg-gray-800/70 text-white p-2 rounded-full transition-opacity z-10 ${isInView ? 'opacity-40' : 'opacity-90'} md:opacity-0 md:group-hover:opacity-100`}
               aria-label="Previous products"
             >
               <ChevronLeft className="w-6 h-6" />
@@ -191,7 +205,7 @@ const MonthlySales = () => {
               onClick={handleNext}
               tabIndex={0}
               onKeyDown={(e) => e.key === 'Enter' && handleNext()}
-              className="absolute top-1/2 right-0 transform -translate-y-1/2 bg-gray-800 bg-opacity-50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+              className={`absolute top-1/2 right-0 -translate-y-1/2 bg-gray-800/70 text-white p-2 rounded-full transition-opacity z-10 ${isInView ? 'opacity-40' : 'opacity-90'} md:opacity-0 md:group-hover:opacity-100`}
               aria-label="Next products"
             >
               <ChevronRight className="w-6 h-6" />

@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { recruitmentService } from '../lib/api-services';
 
 // Mock data cho danh sách công việc
 const jobs = [
@@ -177,19 +178,10 @@ export default function TuyenDung() {
         submitData.append('cvFile', formData.cvFile);
       }
 
-      const response = await fetch('/api/recruitment/apply', {
-        method: 'POST',
-        body: submitData,
-      });
+      const result = await recruitmentService.apply(submitData);
 
-      const result = await response.json();
-
-      if (response.ok) {
-        toast.success(result.message || 'Gửi hồ sơ ứng tuyển thành công! Chúng tôi sẽ liên hệ với bạn sớm nhất.');
-        closeModal();
-      } else {
-        throw new Error(result.message || 'Đã xảy ra lỗi khi gửi hồ sơ');
-      }
+      toast.success(result.message || 'Gửi hồ sơ ứng tuyển thành công! Chúng tôi sẽ liên hệ với bạn sớm nhất.');
+      closeModal();
     } catch (error) {
       console.error('Apply error:', error);
       toast.error(error.message || 'Đã xảy ra lỗi. Vui lòng thử lại sau.');
@@ -233,7 +225,7 @@ export default function TuyenDung() {
               priority
             />
           </div>
-          <div className="max-w-7xl mx-auto px-4 relative z-10 text-center">
+          <div className="container mx-auto relative z-10 text-center">
             <span className="inline-block py-1 px-3 rounded-full bg-green-500/20 text-green-300 text-sm font-medium mb-4 border border-green-500/30">
               Chúng tôi đang tuyển dụng!
             </span>
@@ -288,7 +280,7 @@ export default function TuyenDung() {
 
         {/* 3. Job Openings */}
         <section id="openings" className="py-20 bg-gray-100">
-          <div className="max-w-5xl mx-auto px-4">
+          <div className="container mx-auto">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
               <div>
                 <h2 className="text-3xl font-bold mb-2 text-slate-900">Vị trí đang chờ đón bạn</h2>
@@ -371,7 +363,7 @@ export default function TuyenDung() {
         </section>
 
         {/* 4. Contact/Footer */}
-        <section className="py-20 max-w-7xl mx-auto px-4 text-center">
+        <section className="py-20 container mx-auto text-center">
           <div className="bg-green-600 rounded-[2rem] p-12 text-white relative overflow-hidden shadow-2xl shadow-green-200">
             <div className="relative z-10">
               <h2 className="text-3xl font-bold mb-4">Chưa tìm thấy vị trí phù hợp?</h2>

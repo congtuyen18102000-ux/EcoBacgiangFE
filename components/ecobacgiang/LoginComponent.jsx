@@ -272,7 +272,7 @@ const LoginComponent = ({ csrfToken, providers, callbackUrl }) => {
                 {/* Links */}
                 <div className="text-center mt-4">
                   <Link
-                    href="/auth/quen-mat-khau"
+                    href="/quen-mat-khau"
                     className="text-blue-600 hover:text-orange-500 transition-colors"
                   >
                     Quên mật khẩu?

@@ -3,10 +3,9 @@ import Head from "next/head";
 import Link from "next/link";
 import { getSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import db from "../../utils/db";
-import Order from "../../models/Order";
 import DefaultLayout from "../../components/layout/DefaultLayout";
 import OrderDetailsPopup from "../../components/users/OrderDetailsPopup";
+import { orderService } from "../../lib/api-services";
 import { paymentMethodText, orderStatusText, orderStatusColors } from "../../utils/mappings";
 import { Package, Calendar, Clock, CreditCard, Eye, ShoppingBag } from "lucide-react";
 
@@ -24,8 +23,26 @@ export default function OrderHistory({ orders: initialOrders }) {
   const [filterType, setFilterType] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [loadingOrders, setLoadingOrders] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const ordersPerPage = 10;
+
+  // Lấy đơn hàng từ BE (client-side, dùng token trong localStorage)
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await orderService.getAll();
+        const list = data?.orders || [];
+        if (!cancelled) setOrders(list);
+      } catch (err) {
+        if (!cancelled) setOrders([]);
+      } finally {
+        if (!cancelled) setLoadingOrders(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     applyFilter(orders, filterType);
@@ -89,14 +106,14 @@ export default function OrderHistory({ orders: initialOrders }) {
         <title>Lịch sử đơn hàng | Eco Bắc Giang</title>
         <meta name="description" content="Xem lịch sử đơn hàng của bạn tại Eco Bắc Giang" />
       </Head>
-      
+      <div className="h-[80px]"></div>
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 py-8 md:py-12">
-        <div className="max-w-7xl mx-auto px-4 md:px-6">
-          {/* Header */}
+        <div className="container mx-auto">
+          {/* Header */}  
           <div className="mb-8">
             <div className="flex items-center space-x-3 mb-2">
               <div className="w-1 h-8 bg-gradient-to-b from-green-500 to-emerald-500 rounded-full"></div>
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold">
                 Lịch sử đơn hàng
               </h1>
             </div>
@@ -156,7 +173,12 @@ export default function OrderHistory({ orders: initialOrders }) {
           )}
 
           {/* Orders List */}
-          {orders.length === 0 ? (
+          {loadingOrders ? (
+            <div className="bg-white rounded-3xl p-8 md:p-12 shadow-xl border border-green-100 text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4" />
+              <p className="text-gray-600">Đang tải đơn hàng...</p>
+            </div>
+          ) : orders.length === 0 ? (
             <div className="bg-white rounded-3xl p-8 md:p-12 shadow-xl border border-green-100 text-center">
               <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <ShoppingBag className="w-12 h-12 text-green-600" />
@@ -375,29 +397,8 @@ export async function getServerSideProps(context) {
       },
     };
   }
-
-  await db.connectDb();
-  const orders = await Order.find({ user: session.user.id }).lean();
-
-  // Làm sạch dữ liệu để đảm bảo JSON-serializable
-  const ordersCleaned = orders.map((order) => ({
-    ...order,
-    _id: order._id.toString(),
-    user: order.user ? order.user.toString() : null,
-    createdAt: order.createdAt.toString(),
-    orderItems: order.orderItems.map((item) => ({
-      ...item,
-      _id: item._id ? item._id.toString() : null,
-      product:
-        item.product && typeof item.product === "object" && item.product._id
-          ? item.product._id.toString()
-          : item.product
-          ? item.product.toString()
-          : null,
-    })),
-  }));
-
+  // Đơn hàng lấy từ BE qua orderService.getAll() ở client (cần token trong localStorage)
   return {
-    props: { orders: ordersCleaned },
+    props: { orders: [] },
   };
 }

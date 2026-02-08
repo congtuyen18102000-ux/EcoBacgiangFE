@@ -1,9 +1,11 @@
 import React from 'react';
 import AdminLayout from '../../../components/layout/AdminLayout';
-import OrderList from '../../../components/ecobacgiang/OrderList';
-import OrderStats from '../../../components/ecobacgiang/OrderStats';
-import TopProducts from '../../../components/ecobacgiang/TopProducts';
-import TopCustomers from '../../../components/ecobacgiang/TopCustomers';
+import {
+  OrderList,
+  OrderStats,
+  TopProducts,
+  TopCustomers,
+} from '../../../components/admin/dashboard';
 
 function OrdersPage() {
   return (

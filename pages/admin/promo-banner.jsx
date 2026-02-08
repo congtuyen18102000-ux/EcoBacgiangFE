@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Head from "next/head";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { promoBannerService } from "../../lib/api-services";
 
 export default function PromoBannerAdmin() {
   const [formData, setFormData] = useState({
@@ -25,28 +26,23 @@ export default function PromoBannerAdmin() {
 
   const fetchConfig = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_SERVER_URL || 'http://localhost:5000/api';
-      const response = await fetch(`${apiUrl}/promo-banner`);
-      if (response.ok) {
-        const data = await response.json();
-        // Format date cho input datetime-local
-        const countdownDate = data.countdownDate
-          ? new Date(data.countdownDate).toISOString().slice(0, 16)
-          : "";
-        
-        setFormData({
-          countdownDate,
-          subtitle: data.subtitle || "",
-          title: data.title || "",
-          description: data.description || "",
-          countdownLabel: data.countdownLabel || "",
-          buttonText: data.buttonText || "",
-          buttonLink: data.buttonLink || "",
-          backgroundImage: data.backgroundImage || "",
-          isActive: data.isActive !== undefined ? data.isActive : true,
-        });
-        setPreviewImage(data.backgroundImage || "");
-      }
+      const data = await promoBannerService.get();
+      const countdownDate = data.countdownDate
+        ? new Date(data.countdownDate).toISOString().slice(0, 16)
+        : "";
+
+      setFormData({
+        countdownDate,
+        subtitle: data.subtitle || "",
+        title: data.title || "",
+        description: data.description || "",
+        countdownLabel: data.countdownLabel || "",
+        buttonText: data.buttonText || "",
+        buttonLink: data.buttonLink || "",
+        backgroundImage: data.backgroundImage || "",
+        isActive: data.isActive !== undefined ? data.isActive : true,
+      });
+      setPreviewImage(data.backgroundImage || "");
     } catch (error) {
       console.error("Error fetching config:", error);
       toast.error("Không thể tải cấu hình");
@@ -73,25 +69,11 @@ export default function PromoBannerAdmin() {
     setSaving(true);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_SERVER_URL || 'http://localhost:5000/api';
-      const response = await fetch(`${apiUrl}/promo-banner`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        toast.success("Cập nhật thành công!");
-      } else {
-        toast.error(data.error || "Có lỗi xảy ra!");
-      }
+      await promoBannerService.update(formData);
+      toast.success("Cập nhật thành công!");
     } catch (error) {
       console.error("Error updating config:", error);
-      toast.error("Có lỗi xảy ra khi cập nhật!");
+      toast.error(error.message || "Có lỗi xảy ra khi cập nhật!");
     } finally {
       setSaving(false);
     }

@@ -44,7 +44,7 @@ export default function VerifyEmail() {
         router.push("/dang-ky");
       }, 2000);
     }
-  }, [router.isReady, email]);
+  }, [router, router.isReady, email]);
 
   const handleOtpChange = (value, index) => {
     // Only allow numbers

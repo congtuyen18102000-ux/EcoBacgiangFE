@@ -16,7 +16,6 @@ import EditLink from "./Link/EditLink";
 import GalleryModal, { ImageSelectionResult } from "./GalleryModal";
 import { imageService } from "../../lib/api-services";
 import SEOForm, { SeoResult } from "./SeoForm";
-import ActionButton from "../common/ActionButton";
 import ThumbnailSelector from "./ThumbnailSelector";
 import WordCount from "./WordCount";
 import { toast } from "react-toastify";
@@ -28,6 +27,7 @@ export interface FinalPost extends SeoResult {
   thumbnail?: File | string;
   focusKeyword: string;
   isDraft?: boolean;
+  isFeatured?: boolean; // Bài viết nổi bật
 }
 
 interface Props {
@@ -57,20 +57,16 @@ const Editor: FC<Props> = ({
     meta: "",
     tags: "",
     slug: "",
-    category:"",
+    category: "",
     focusKeyword: "",
+    isFeatured: false,
   });
+  const [featuredCount, setFeaturedCount] = useState<number>(0);
 
-  // Kiểm tra xem có phải đang tạo bài viết mới không
   const isCreatingNewPost = !initialValue?.id;
-  
-  // Debug để kiểm tra giá trị
-  console.log("Editor debug:", { 
-    initialValue, 
-    hasId: !!initialValue?.id, 
-    isCreatingNewPost,
-    btnTitle 
-  });
+  const MAX_FEATURED = 4;
+  const canSetFeatured =
+    featuredCount < MAX_FEATURED || (initialValue?.isFeatured === true);
 
   const fetchImages = async () => {
     try {
@@ -167,10 +163,16 @@ const Editor: FC<Props> = ({
 
     const handleSubmit = () => {
       if (!editor) return;
-      // Khi submit bài viết (không phải nháp), set isDraft = false
-      // Chỉ giữ isDraft = true nếu đang lưu nháp
       const finalIsDraft = btnTitle === "Đăng bài" ? false : isDraft;
-      onSubmit({ ...post, content: editor.getHTML(), isDraft: finalIsDraft });
+      const allowFeatured =
+        featuredCount < MAX_FEATURED || initialValue?.isFeatured === true;
+      const finalIsFeatured = allowFeatured ? (post.isFeatured ?? false) : false;
+      onSubmit({
+        ...post,
+        content: editor.getHTML(),
+        isDraft: finalIsDraft,
+        isFeatured: finalIsFeatured,
+      });
     };
 
     const saveDraft = useCallback(async () => {
@@ -204,9 +206,12 @@ const Editor: FC<Props> = ({
         if (post.thumbnail instanceof File) {
           formData.append("thumbnail", post.thumbnail);
         } else if (typeof post.thumbnail === 'string' && post.thumbnail.trim()) {
-          // Append thumbnail URL if selected from gallery
           formData.append("thumbnail", post.thumbnail);
         }
+        formData.append(
+          "isFeatured",
+          canSetFeatured && post.isFeatured === true ? "true" : "false"
+        );
 
         // Use Server API
         const apiBaseUrl = process.env.NEXT_PUBLIC_API_SERVER_URL;
@@ -248,7 +253,7 @@ const Editor: FC<Props> = ({
       } finally {
         setSavingDraft(false);
       }
-    }, [editor, post, isCreatingNewPost]);
+    }, [editor, post, isCreatingNewPost, canSetFeatured]);
 
     const publishDraft = useCallback(async () => {
       if (!post.id) {
@@ -340,19 +345,46 @@ const Editor: FC<Props> = ({
     }, []);
 
     useEffect(() => {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_SERVER_URL;
+      if (!apiBaseUrl) return;
+      let cancelled = false;
+      (async () => {
+        try {
+          const res = await fetch(
+            `${apiBaseUrl}/posts?limit=1000&skip=0&includeDrafts=false`
+          );
+          if (!res.ok || cancelled) return;
+          const data = await res.json();
+          const posts = data.posts || data || [];
+          const count = Array.isArray(posts)
+            ? posts.filter((p: { isFeatured?: boolean }) => p.isFeatured === true).length
+            : 0;
+          if (!cancelled) setFeaturedCount(count);
+        } catch {
+          if (!cancelled) setFeaturedCount(0);
+        }
+      })();
+      return () => {
+        cancelled = true;
+      };
+    }, []);
+
+    useEffect(() => {
       if (initialValue) {
         setPost({ ...initialValue });
         editor?.commands.setContent(initialValue.content);
 
-        const { meta, slug, tags, category, focusKeyword } = initialValue;
+        const { meta, slug, tags, category, focusKeyword, isFeatured } = initialValue;
         setSeoInitialValue({ meta, slug, tags, category, focusKeyword });
-        
-        // Cập nhật trạng thái nháp từ initialValue
-        // Nếu đang edit bài viết có sẵn, giữ nguyên trạng thái isDraft từ database
-        // Nếu tạo mới (không có id), mặc định là draft
         setIsDraft(initialValue.isDraft ?? true);
+        const allowFeatured =
+          featuredCount < MAX_FEATURED || isFeatured === true;
+        setPost((prev) => ({
+          ...prev,
+          isFeatured: allowFeatured ? (isFeatured ?? false) : false,
+        }));
       }
-    }, [initialValue, editor]);
+    }, [initialValue, editor, featuredCount]);
 
       return (
       <>
@@ -440,6 +472,35 @@ const Editor: FC<Props> = ({
                 onChange={updateTitle}
                 value={post.title}
               />
+            </div>
+
+            {/* Bài viết nổi bật - tối đa 4 */}
+            <div className="flex flex-wrap items-center gap-2 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+              <input
+                type="checkbox"
+                id="isFeatured"
+                checked={(post.isFeatured ?? false) && canSetFeatured}
+                disabled={!canSetFeatured}
+                onChange={(e) =>
+                  canSetFeatured &&
+                  setPost((prev) => ({ ...prev, isFeatured: e.target.checked }))
+                }
+                className="w-4 h-4 rounded border-gray-300 text-green-600 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+              <label
+                htmlFor="isFeatured"
+                className={`text-sm font-medium cursor-pointer ${
+                  canSetFeatured
+                    ? "text-gray-700 dark:text-gray-300"
+                    : "text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                }`}
+              >
+                Bài viết nổi bật
+              </label>
+              <span className="text-xs text-gray-500">
+                ({featuredCount}/{MAX_FEATURED})
+                {!canSetFeatured && " — Đã đủ 4 bài nổi bật"}
+              </span>
             </div>
             
             {/* ToolBar - Luôn ở vị trí cố định */}

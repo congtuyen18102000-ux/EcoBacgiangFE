@@ -1,11 +1,12 @@
 import React from 'react';
+import Image from 'next/image';
 
 const ProductCard = ({ image, discount, name, rating, reviews, price, originalPrice, inStock }) => {
   return (
     <div className="w-full sm:w-48 md:w-56 lg:w-60 bg-white rounded-lg shadow-md p-4 flex flex-col items-center transition-transform transform hover:scale-105">
       {/* Discount Badge */}
-      <div className="relative w-full">
-        <img src={image} alt={name} className="w-full h-32 object-contain" />
+      <div className="relative w-full h-32">
+        <Image src={image} alt={name} fill className="object-contain" unoptimized />
     
         <button className="absolute top-2 right-2 text-gray-400 hover:text-red-500">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

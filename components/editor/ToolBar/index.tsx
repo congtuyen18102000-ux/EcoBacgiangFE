@@ -31,11 +31,14 @@ interface Props {
   onOpenImageClick?(): void;
 }
 
+type OpenToolbarKey = "head" | "link" | "youtube" | "facebook" | "image" | "findreplace" | null;
+
 const ToolBar: FC<Props> = ({
   editor,
   onOpenImageClick,
 }): JSX.Element | null => {
   const [textColor, setTextColor] = useState<string>("#000000");
+  const [openToolbar, setOpenToolbar] = useState<OpenToolbarKey>(null);
 
   const handleTextColorChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!editor) return;
@@ -172,7 +175,12 @@ const ToolBar: FC<Props> = ({
     <div className="flex flex-wrap items-center gap-2 p-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
       {/* Text Formatting Group */}
       <div className="flex items-center gap-1 flex-wrap">
-        <DropdownOptions options={options} head={<Head />} />
+        <DropdownOptions
+          options={options}
+          head={<Head />}
+          open={openToolbar === "head"}
+          onOpenChange={(open) => setOpenToolbar(open ? "head" : null)}
+        />
         
         <div className="h-4 w-[1px] bg-gray-300 dark:bg-gray-600 mx-1" />
         
@@ -268,7 +276,11 @@ const ToolBar: FC<Props> = ({
           <BsBraces />
         </Button>
 
-        <InsertLink onSubmit={handleLinkSubmit} />
+        <InsertLink
+          onSubmit={handleLinkSubmit}
+          open={openToolbar === "link"}
+          onOpenChange={(open) => setOpenToolbar(open ? "link" : null)}
+        />
 
         <Button
           active={editor.isActive("orderedList")}
@@ -289,16 +301,36 @@ const ToolBar: FC<Props> = ({
       <div className="flex items-center gap-1 flex-wrap">
         <div className="h-4 w-[1px] bg-gray-300 dark:bg-gray-600 mx-1" />
         
-        <EmbedYoutube onSubmit={handleEmbedYoutube} />
-        <EmbedFacebookReels onSubmit={handleEmbedFacebookReels} />
-        
-        <EmbedImage onSubmit={handleEmbedImage} />
+        <EmbedYoutube
+          onSubmit={handleEmbedYoutube}
+          open={openToolbar === "youtube"}
+          onOpenChange={(open) => setOpenToolbar(open ? "youtube" : null)}
+        />
+        <EmbedFacebookReels
+          onSubmit={handleEmbedFacebookReels}
+          open={openToolbar === "facebook"}
+          onOpenChange={(open) => setOpenToolbar(open ? "facebook" : null)}
+        />
+        <EmbedImage
+          onSubmit={handleEmbedImage}
+          open={openToolbar === "image"}
+          onOpenChange={(open) => setOpenToolbar(open ? "image" : null)}
+        />
 
-        <Button onClick={onOpenImageClick}>
+        <Button
+          onClick={() => {
+            setOpenToolbar(null);
+            onOpenImageClick?.();
+          }}
+        >
           <BsImageFill />
         </Button>
 
-        <FindReplace editor={editor} />
+        <FindReplace
+          editor={editor}
+          open={openToolbar === "findreplace"}
+          onOpenChange={(open) => setOpenToolbar(open ? "findreplace" : null)}
+        />
       </div>
     </div>
   );

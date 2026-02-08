@@ -39,7 +39,7 @@ const VisionMissionCoreValues = () => {
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </Head>
     <div className="h-[80px]"></div>
-      <div className="mx-auto p-4 md:max-w-7xl">
+      <div className="mx-auto p-4 container">
         <div className="text-center mt-6">
           <h1 className="md:text-2xl text-xl font-bold text-green-800 mb-2">
             Tầm Nhìn - Sứ Mệnh - Giá Trị Cốt Lõi

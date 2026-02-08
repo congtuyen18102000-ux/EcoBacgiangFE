@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 
 const BusinessPhilosophy = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -12,14 +13,14 @@ const BusinessPhilosophy = () => {
   }, []);
 
   return (
-    <section className="relative py-16 bg-gradient-to-br from-green-50 to-green-100 overflow-hidden">
+    <section className="relative py-8 bg-gradient-to-br from-green-50 to-green-100 overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute top-10 right-10 w-64 h-64 bg-green-300 rounded-full mix-blend-multiply filter blur-xl"></div>
         <div className="absolute bottom-10 left-10 w-64 h-64 bg-green-400 rounded-full mix-blend-multiply filter blur-xl"></div>
       </div>
 
-      <div className="relative container mx-auto max-w-7xl px-6">
+      <div className="relative container mx-auto px-4 md:px-0">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Content Section */}
           <div className="space-y-8">
@@ -94,18 +95,19 @@ const BusinessPhilosophy = () => {
           <div className={`relative transition-all duration-1000 delay-1000 ${
             isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
           }`}>
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl h-96">
               <div className="absolute inset-0 bg-gradient-to-t from-green-900/20 to-transparent z-10"></div>
-              <img
-                src="/images/tam-nhin.jpg"
+              <Image
+                src="/images/robot.jpg"
                 alt="Tầm nhìn Eco Bắc Giang"
-                className="w-full h-96 object-cover rounded-2xl"
+                fill
+                className="object-cover rounded-2xl"
               />
               
               {/* Overlay Content */}
               <div className="absolute bottom-6 left-6 right-6 z-20">
-                <div className="bg-white/90 backdrop-blur-base rounded-xl p-6 shadow-lg">
-                  <h3 className="text-lg md:text-xl font-bold text-green-700 mb-2 font-heading">
+                <div className="bg-white/90 backdrop-blur-base rounded-xl px-6 py-3 shadow-lg">
+                  <h3 className="text-lg md:text-xl font-bold text-green-700  font-heading">
                     Tầm Nhìn 2050
                   </h3>
                   <p className="text-gray-700 text-base">

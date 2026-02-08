@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import ProductCard from '../product/ProductCard';
+import ProductCard from '../products/ProductCard';
 
 const CategoryProductSlider = ({ categoryName, categoryTitle }) => {
   const [products, setProducts] = useState([]);
@@ -108,7 +108,7 @@ const CategoryProductSlider = ({ categoryName, categoryTitle }) => {
 
   return (
     <section className="py-6 md:py-8 bg-white">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 md:px-0">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg md:text-xl font-bold text-gray-900">{categoryTitle}</h2>
         <Link 

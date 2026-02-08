@@ -1,91 +1,89 @@
 /**
- * Script để import sản phẩm từ file JSON vào MongoDB
- * 
- * Cách sử dụng:
- * 1. Đảm bảo MongoDB đang chạy
- * 2. Cập nhật MONGODB_URI trong file .env hoặc trong script này
- * 3. Chạy: node scripts/import-products.js
+ * Script import sản phẩm từ file JSON vào backend (BE) qua API
+ *
+ * Cách dùng:
+ * 1. Đảm bảo BE đang chạy (ecobacgiangBE)
+ * 2. Set API_SERVER_URL trong .env (ví dụ: http://localhost:5000/api) hoặc NEXT_PUBLIC_API_SERVER_URL
+ * 3. (Tùy chọn) Set token admin trong .env (API_ADMIN_TOKEN) nếu BE yêu cầu auth cho POST /products
+ * 4. Chạy: node scripts/import-products.js
  */
 
-const mongoose = require('mongoose');
 const fs = require('fs');
 const path = require('path');
-const Product = require('../server/models/Product');
-const db = require('../server/config/database');
 
-// Đường dẫn đến file JSON
+require('dotenv').config({ path: path.join(__dirname, '..', '.env.local') });
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+
 const jsonFilePath = path.join(__dirname, '..', 'sample-products.json');
+const apiBaseUrl =
+  process.env.API_SERVER_URL ||
+  process.env.NEXT_PUBLIC_API_SERVER_URL ||
+  'http://localhost:5000/api';
+const adminToken = process.env.API_ADMIN_TOKEN || process.env.TOKEN || '';
 
 async function importProducts() {
   try {
-    // Kết nối database
-    await db.connectDb();
-    console.log('✅ Đã kết nối database thành công');
+    if (!fs.existsSync(jsonFilePath)) {
+      console.error('❌ Không tìm thấy file:', jsonFilePath);
+      process.exit(1);
+    }
 
-    // Đọc file JSON
     const jsonData = fs.readFileSync(jsonFilePath, 'utf8');
     const products = JSON.parse(jsonData);
     console.log(`📦 Đã đọc ${products.length} sản phẩm từ file JSON`);
+    console.log(`🔗 Gọi BE: ${apiBaseUrl}/products\n`);
 
-    // Import từng sản phẩm
     let successCount = 0;
     let errorCount = 0;
     const errors = [];
 
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(adminToken && { Authorization: `Bearer ${adminToken}` }),
+    };
+
     for (const productData of products) {
       try {
-        // Kiểm tra xem sản phẩm đã tồn tại chưa (theo maSanPham hoặc slug)
-        const existingProduct = await Product.findOne({
-          $or: [
-            { maSanPham: productData.maSanPham },
-            { slug: productData.slug }
-          ]
+        const res = await fetch(`${apiBaseUrl}/products`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(productData),
         });
 
-        if (existingProduct) {
-          console.log(`⚠️  Sản phẩm "${productData.name}" đã tồn tại (maSanPham: ${productData.maSanPham}), bỏ qua...`);
-          continue;
-        }
+        const body = await res.json().catch(() => ({}));
 
-        // Tạo sản phẩm mới
-        const product = new Product(productData);
-        await product.save();
-        successCount++;
-        console.log(`✅ Đã import: ${productData.name}`);
-      } catch (error) {
+        if (res.ok && (body.status === 'success' || body.product)) {
+          successCount++;
+          console.log(`✅ Đã import: ${productData.name}`);
+        } else if (res.status === 400 && (body.err || body.error || '').includes('tồn tại')) {
+          console.log(`⚠️  Sản phẩm "${productData.name}" đã tồn tại, bỏ qua...`);
+        } else {
+          errorCount++;
+          const msg = body.err || body.error || body.message || res.statusText || res.status;
+          errors.push({ product: productData.name, error: msg });
+          console.error(`❌ Lỗi "${productData.name}":`, msg);
+        }
+      } catch (err) {
         errorCount++;
-        const errorMsg = `❌ Lỗi khi import "${productData.name}": ${error.message}`;
-        console.error(errorMsg);
-        errors.push({ product: productData.name, error: error.message });
+        errors.push({ product: productData.name, error: err.message });
+        console.error(`❌ Lỗi khi import "${productData.name}":`, err.message);
       }
     }
 
-    // Tổng kết
     console.log('\n📊 Tổng kết:');
     console.log(`✅ Thành công: ${successCount} sản phẩm`);
     console.log(`❌ Lỗi: ${errorCount} sản phẩm`);
-    
+
     if (errors.length > 0) {
       console.log('\n📝 Chi tiết lỗi:');
-      errors.forEach((err, index) => {
-        console.log(`${index + 1}. ${err.product}: ${err.error}`);
-      });
+      errors.forEach((err, i) => console.log(`${i + 1}. ${err.product}: ${err.error}`));
     }
-
   } catch (error) {
     console.error('❌ Lỗi khi import:', error);
-  } finally {
-    // Đóng kết nối database
-    try {
-      await db.disconnectDb();
-      console.log('\n✅ Đã đóng kết nối database');
-    } catch (disconnectError) {
-      console.error('⚠️  Lỗi khi đóng kết nối:', disconnectError.message);
-    }
-    process.exit(0);
+    process.exit(1);
   }
+
+  process.exit(0);
 }
 
-// Chạy script
 importProducts();
-

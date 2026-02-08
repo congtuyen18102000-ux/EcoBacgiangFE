@@ -6,11 +6,11 @@ import Link from "next/link";
 import { IoSearch, IoCartOutline } from "react-icons/io5";
 import { AiOutlineMenu, AiOutlineClose } from "react-icons/ai";
 import { FaRegUser } from "react-icons/fa";
-import ShoppingCart from "../fontend/products/ShoppingCart";
+import ShoppingCart from "../products/ShoppingCart";
 import ResponsiveNavbar from "./ResponsiveNavbar";
 import UserDropdown from "./UserDropdown";
 import CrowdfundingSection from "./CrowdfundingSection";
-import { useSession } from "next-auth/react";
+import useAuth from "../../hooks/useAuth";
 import { setCart } from "../../store/cartSlice";
 import { useSelector, useDispatch } from "react-redux";
 
@@ -26,7 +26,8 @@ const Navbar = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [productsCache, setProductsCache] = useState(null);
-  const { data: session } = useSession();
+  const { user: sessionUser, isAuthenticated } = useAuth();
+  const session = isAuthenticated ? { user: sessionUser } : null;
 
   const dropdownRef = useRef(null);
 
@@ -38,11 +39,11 @@ const Navbar = () => {
   // Sync cart with backend on login
   useEffect(() => {
     async function syncCart() {
-      if (session?.user?.id) {
+      if (sessionUser?.id) {
         try {
           // Chỉ dùng Server API
           const { cartService } = await import("../../lib/api-services");
-          const cart = await cartService.get(session.user.id);
+          const cart = await cartService.get(sessionUser.id);
           dispatch(setCart(cart));
         } catch (error) {
           // Chỉ log error, không hiển thị toast để tránh spam
@@ -58,7 +59,7 @@ const Navbar = () => {
       // Điều này cho phép người dùng chưa đăng nhập vẫn có thể thêm sản phẩm vào giỏ hàng
     }
     syncCart();
-  }, [session?.user?.id, dispatch]);
+  }, [sessionUser?.id, dispatch]);
 
   // Close user dropdown when clicking outside
   useEffect(() => {
@@ -125,17 +126,29 @@ const Navbar = () => {
     }
   }, [searchOpen, productsCache]);
 
+  // Lấy URL ảnh từ product (API trả về image là mảng hoặc string)
+  const getProductImageUrl = (product) => {
+    const raw = Array.isArray(product.image)
+      ? product.image[0]
+      : product.image || product.images?.[0];
+    if (!raw) return null;
+    if (typeof raw === "object" && raw?.url) return raw.url;
+    const url = typeof raw === "string" ? raw : String(raw);
+    if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/")) return url;
+    return `/${url}`;
+  };
+
   // Normalize text để tìm kiếm không phân biệt hoa thường và có dấu
   const normalizeText = (text) => {
     if (!text) return '';
-    return text
+    return String(text)
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '') // Loại bỏ dấu
       .trim();
   };
 
-  // Search function - chỉ tìm kiếm sản phẩm với filter ở client-side
+  // Search function - lọc sản phẩm chính xác theo từng từ trong query
   const performSearch = async (query) => {
     if (!query.trim()) {
       setSearchResults([]);
@@ -155,27 +168,35 @@ const Navbar = () => {
       }
       
       const normalizedQuery = normalizeText(query);
-      
-      // Filter sản phẩm theo từ khóa (tìm trong tên, mô tả, slug, category)
+      const queryWords = normalizedQuery.split(/\s+/).filter(Boolean);
+      if (queryWords.length === 0) {
+        setSearchResults([]);
+        return;
+      }
+
       const filteredProducts = allProducts.filter(product => {
         const name = product.name || product.title || '';
         const description = product.description || product.shortDescription || '';
         const slug = product.slug || '';
-        const category = product.category || '';
+        const slugForSearch = slug ? String(slug).replace(/-/g, ' ') : '';
+        const category = product.category;
+        const categoryStr = typeof category === 'object' && category !== null
+          ? (category.name || category.title || category.slug || '')
+          : (category || '');
         
-        const searchableText = `${name} ${description} ${slug} ${category}`;
-        const normalizedText = normalizeText(searchableText);
+        const searchableText = `${name} ${description} ${slugForSearch} ${slug} ${categoryStr}`;
+        const normalizedSearch = normalizeText(searchableText);
         
-        // Tìm kiếm chính xác từ khóa trong text
-        return normalizedText.includes(normalizedQuery);
+        // Mỗi từ trong query phải xuất hiện trong text (tìm theo từ, chính xác hơn)
+        return queryWords.every(word => normalizedSearch.includes(word));
       });
       
-      // Format lại để hiển thị
+      // Format lại để hiển thị (image phải là URL string, API trả về product.image là mảng)
       setSearchResults(filteredProducts.map(product => ({
         id: product._id || product.id,
         title: product.name || product.title,
         slug: product.slug,
-        image: product.image || product.images?.[0],
+        image: getProductImageUrl(product),
         price: product.price,
         description: product.description || product.shortDescription,
         type: 'product'
@@ -199,6 +220,7 @@ const Navbar = () => {
     }, 300);
 
     return () => clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-run when searchQuery changes; performSearch is stable
   }, [searchQuery]);
 
   // Handle search selection
@@ -234,7 +256,7 @@ const Navbar = () => {
           : "bg-white shadow-lg border-b border-gray-100"
       }`}
     >
-      <div className="flex justify-between items-center h-full w-full px-4 md:px-16">
+      <div className="flex justify-between container mx-auto items-center h-full w-full px-4 md:px-0">
         {/* Left Side - Logo */}
         <div className="flex-shrink-0">
           <Link href="/">
@@ -470,12 +492,14 @@ const Navbar = () => {
                           onClick={() => handleSearchSelect(item)}
                           className="w-full flex items-center p-3 hover:bg-green-50 rounded-lg transition-colors text-left border border-transparent hover:border-green-200"
                         >
-                          <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mr-3 overflow-hidden flex-shrink-0">
+                          <div className="relative w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mr-3 overflow-hidden flex-shrink-0">
                             {item.image ? (
-                              <img 
-                                src={item.image} 
+                              <Image
+                                src={item.image}
                                 alt={item.title}
-                                className="w-full h-full object-cover"
+                                fill
+                                className="object-cover"
+                                unoptimized
                               />
                             ) : (
                               <span className="text-2xl">🥬</span>
