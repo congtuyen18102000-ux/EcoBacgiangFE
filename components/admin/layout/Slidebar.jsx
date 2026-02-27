@@ -66,22 +66,12 @@ export default function Sidebar() {
       icon: TicketPercent,
       href: "/dashboard/ma-giam-gia",
     },
-    {
-      title: "Email đăng ký",
-      icon: Mail,
-      href: "/dashboard/danh-sach-email",
-    },
+
     {
       title: "Kế toán Nội bộ",
       icon: Calculator,
       href: "/dashboard/ke-toan-noi-bo",
     },
-    {
-      title: "Danh sách ứng viên",
-      icon: Briefcase,
-      href: "/dashboard/danh-sach-ung-vien",
-    },
-
     {
       title: "Cài đặt",
       icon: Settings,
@@ -89,11 +79,6 @@ export default function Sidebar() {
     },
   ];
 
-  const catalogueLinks = [
-
-  
-
-  ];
   const [openMenu, setOpenMenu] = useState(false);
 
   // Hàm xử lý đăng xuất
